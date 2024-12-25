@@ -135,17 +135,234 @@ const deleteProject = async (projectId, userId) => {
 /**
  * Assign a user to a project
  */
-const assignUserToProject = async (projectId, userId) => {
-  await prisma.projectUsers.create({
-    data: { projectId, userId },
+// const assignUserToProject = async ({ projectId, userId, role }) => {
+//   // await prisma.projectUsers.create({
+//   //   data: { projectId, userId },
+//   // });
+
+//   // // Log activity
+//   // await logger.logActivity({
+//   //   userId,
+//   //   action: 'ASSIGN_USER_TO_PROJECT',
+//   //   details: `Assigned user ${userId} to project ${projectId}`,
+//   // });
+//   // Step 1: Validate that the project exists
+//   const project = await prisma.project.findUnique({
+//     where: { id: projectId },
+//     include: { organization: true },
+//   });
+
+//   if (!project) {
+//     throw new Error('Project not found.');
+//   }
+
+//   // Step 2: Validate that the user is part of the organization
+//   const organizationMembership = await prisma.organizationMember.findUnique({
+//     where: {
+//       organizationId_userId: {
+//         organizationId: project.organizationId,
+//         userId,
+//       },
+//     },
+//   });
+
+//   if (!organizationMembership) {
+//     throw new Error('User is not a member of the organization associated with this project.');
+//   }
+
+//   // Step 3: Check if the user is already a member of the project
+//   const existingProjectMember = await prisma.projectMember.findUnique({
+//     where: {
+//       projectId_userId: {
+//         projectId,
+//         userId,
+//       },
+//     },
+//   });
+
+//   if (existingProjectMember) {
+//     throw new Error('User is already a member of the project.');
+//   }
+
+//   // Step 4: Add the user as a member of the project
+//   const newMember = await prisma.projectMember.create({
+//     data: {
+//       projectId,
+//       userId,
+//       role,
+//     },
+//   });
+
+//   return newMember;
+// };
+
+
+// const assignUserToProject = async ({ projectId, userId, role, currentUser }) => {
+//   // Step 1: Fetch the project and its associated organization
+//   const project = await prisma.project.findUnique({
+//     where: { id: projectId },
+//     include: { organization: true },
+//   });
+
+//   if (!project) {
+//     throw new Error('Project not found.');
+//   }
+
+//   // Step 2: Validate that the user is part of the organization
+//   const organizationMembership = await prisma.organizationMember.findUnique({
+//     where: {
+//       organizationId_userId: {
+//         organizationId: project.organizationId,
+//         userId: currentUser.userId, // currentUser represents the logged-in user performing the action
+//       },
+//     },
+//   });
+
+//   if (!organizationMembership) {
+//     throw new Error('You are not a member of the organization associated with this project.');
+//   }
+
+//   // Step 3: Check if the user performing the action has the right permissions
+//   const currentUserProjectMembership = await prisma.projectMember.findUnique({
+//     where: {
+//       projectId_userId: {
+//         projectId,
+//         userId: currentUser.userId,
+//       },
+//     },
+//   });
+//   console.log(currentUserProjectMembership);
+  
+//   if (!currentUserProjectMembership) {
+//     throw new Error('You are not a member of this project.');
+//   }
+
+//   // Only admins can assign any role; project managers can only assign 'member'
+//   if (
+//     currentUserProjectMembership.role !== 'ADMIN' &&
+//     (currentUserProjectMembership.role === 'PROJECT_MANAGER' && role !== 'member')
+//   ) {
+//     throw new Error(
+//       'You do not have permission to assign this role. Project Managers can only assign the "member" role.'
+//     );
+//   }
+
+//   // Step 4: Check if the target user is already a member of the project
+//   const existingProjectMember = await prisma.projectMember.findUnique({
+//     where: {
+//       projectId_userId: {
+//         projectId,
+//         userId,
+//       },
+//     },
+//   });
+
+//   if (existingProjectMember) {
+//     throw new Error('User is already a member of the project.');
+//   }
+
+//   // Step 5: Add the user as a member of the project
+//   const newMember = await prisma.projectMember.create({
+//     data: {
+//       projectId,
+//       userId,
+//       role,
+//     },
+//   });
+
+//   return newMember;
+// };
+
+const assignUserToProject = async ({ projectId, userId, role, currentUser }) => {
+  // Step 1: Fetch the project and its associated organization
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    include: { organization: true },
   });
 
-  // Log activity
-  await logger.logActivity({
-    userId,
-    action: 'ASSIGN_USER_TO_PROJECT',
-    details: `Assigned user ${userId} to project ${projectId}`,
+  if (!project) {
+    throw new Error('Project not found.');
+  }
+
+  console.log('Current Project:', project);
+
+  // Step 2: Validate that the user is part of the organization
+  const organizationMembership = await prisma.organizationMember.findUnique({
+    where: {
+      organizationId_userId: {
+        organizationId: project.organizationId,
+        userId: currentUser.userId, // currentUser represents the logged-in user performing the action
+      },
+    },
   });
+
+  if (!organizationMembership) {
+    throw new Error('You are not a member of the organization associated with this project.');
+  }
+
+  console.log('Organization Membership:', organizationMembership);
+
+  // Step 3: Allow admins to bypass project membership check
+  if (organizationMembership.role === 'ADMIN') {
+    console.log('User is an organization-level ADMIN. Bypassing project membership check.');
+  } else {
+    // Check if the user is a member of the project
+    console.log("hello kabuyacfercefr ceer c e rc");
+    
+    console.log(currentUser.userId, projectId);
+    
+    const currentUserProjectMembership = await prisma.projectMember.findUnique({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId: currentUser.userId,
+        },
+      },
+    });
+
+    console.log('Current User Project Membership:', currentUserProjectMembership);
+
+    if (!currentUserProjectMembership) {
+      throw new Error('You are not a member of this project.');
+    }
+
+    // Only admins can assign any role; project managers can only assign 'member'
+    if (
+      currentUserProjectMembership.role !== 'ADMIN' &&
+      (currentUserProjectMembership.role === 'PROJECT_MANAGER' && role !== 'MEMBER')
+    ) {
+      throw new Error(
+        'You do not have permission to assign this role. Project Managers can only assign the "MEMBER" role.'
+      );
+    }
+  }
+
+  console.log(projectId, userId);
+  
+  // Step 4: Check if the target user is already a member of the project
+  const existingProjectMember = await prisma.projectMember.findUnique({
+    where: {
+      projectId_userId: {
+        projectId,
+        userId,
+      },
+    },
+  });
+
+  if (existingProjectMember) {
+    throw new Error('User is already a member of the project.');
+  }
+
+  // Step 5: Add the user as a member of the project
+  const newMember = await prisma.projectMember.create({
+    data: {
+      projectId,
+      userId,
+      role,
+    },
+  });
+
+  return newMember;
 };
 
 /**

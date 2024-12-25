@@ -58,17 +58,58 @@ exports.deleteProject = async (req, res) => {
 };
 
 // Assign a user to a project
-exports.assignUserToProject = async (req, res) => {
-  try {
-    const { projectId, userId } = req.body;
+// exports.assignUserToProject = async (req, res) => {
+//   // try {
+//   //   const { projectId, userId } = req.body;
 
-    await projectService.assignUserToProject(projectId, userId);
-    res.status(200).json({ message: 'User assigned to project successfully' });
+//   //   await projectService.assignUserToProject(projectId, userId);
+//   //   res.status(200).json({ message: 'User assigned to project successfully' });
+//   // } catch (error) {
+//   //   console.error(error.message);
+//   //   res.status(500).json({ error: 'Internal server error' });
+//   // }
+//   const { projectId } = req.params;
+//   const { userId, role } = req.body;
+
+//   try {
+//     // Call the service to add a member to the project
+//     const result = await projectService.assignUserToProject({ projectId, userId, role });
+
+//     return res.status(200).json({
+//       message: 'Member successfully added to the project.',
+//       data: result,
+//     });
+//   } catch (error) {
+//     return res.status(400).json({
+//       message: error.message || 'An error occurred while adding the member to the project.',
+//     });
+//   }
+// };
+exports.assignUserToProject = async (req, res) => {
+  const { projectId } = req.params;
+  const { userId, role } = req.body;
+  const currentUser = req.user; // Assuming this is set by authentication middleware
+  console.log("useriD", userId);
+  
+  try {
+    const result = await projectService.assignUserToProject({
+      projectId,
+      userId,
+      role,
+      currentUser,
+    });
+
+    return res.status(200).json({
+      message: 'Member successfully added to the project.',
+      data: result,
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(400).json({
+      message: error.message || 'An error occurred while adding the member to the project.',
+    });
   }
 };
+
 
 // Get all users assigned to a project
 exports.getProjectUsers = async (req, res) => {
