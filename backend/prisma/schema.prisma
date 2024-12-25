@@ -1,0 +1,146 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String   // This stores the password hash
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  createdOrganizations Organization[]    @relation("CreatedByUser")
+  createdProjects      Project[]        @relation("CreatedByUser")
+  createdCredentials   Credential[]     @relation("CreatedByUser")
+  organizations        OrganizationMember[]
+  projects            ProjectMember[]
+
+  @@map("users")
+}
+
+model Organization {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   String   @map("created_by") @db.Uuid
+
+  // Relations
+  creator     User                @relation("CreatedByUser", fields: [createdBy], references: [id])
+  projects    Project[]
+  members     OrganizationMember[]
+
+  @@map("organizations")
+}
+
+model Project {
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String
+  description    String?
+  organizationId String   @map("organization_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  createdBy      String   @map("created_by") @db.Uuid
+
+  // Relations
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  creator        User             @relation("CreatedByUser", fields: [createdBy], references: [id])
+  credentials    Credential[]
+  members        ProjectMember[]
+  tags          ProjectTag[]
+
+  @@map("projects")
+}
+
+model Credential {
+  id             String    @id @default(uuid()) @db.Uuid
+  name           String
+  type           String
+  value          String
+  description    String?
+  projectId      String    @map("project_id") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  createdBy      String    @map("created_by") @db.Uuid
+  expirationDate DateTime? @map("expiration_date")
+
+  // Relations
+  project     Project        @relation(fields: [projectId], references: [id])
+  creator     User          @relation("CreatedByUser", fields: [createdBy], references: [id])
+  tags        CredentialTag[]
+
+  @@map("credentials")
+}
+
+model OrganizationMember {
+  organizationId String   @map("organization_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  role           String
+  addedAt        DateTime @default(now()) @map("added_at")
+
+  // Relations
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+
+  @@id([organizationId, userId])
+  @@map("organization_members")
+}
+
+model ProjectMember {
+  projectId String   @map("project_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  role      String
+  addedAt   DateTime @default(now()) @map("added_at")
+
+  // Relations
+  project   Project @relation(fields: [projectId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@id([projectId, userId])
+  @@map("project_members")
+}
+
+model Tag {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  // Relations
+  credentials CredentialTag[]
+  projects    ProjectTag[]
+
+  @@map("tags")
+}
+
+model CredentialTag {
+  credentialId String @map("credential_id") @db.Uuid
+  tagId        String @map("tag_id") @db.Uuid
+
+  // Relations
+  credential   Credential @relation(fields: [credentialId], references: [id])
+  tag         Tag       @relation(fields: [tagId], references: [id])
+
+  @@id([credentialId, tagId])
+  @@map("credential_tags")
+}
+
+model ProjectTag {
+  projectId String @map("project_id") @db.Uuid
+  tagId     String @map("tag_id") @db.Uuid
+
+  // Relations
+  project    Project @relation(fields: [projectId], references: [id])
+  tag        Tag    @relation(fields: [tagId], references: [id])
+
+  @@id([projectId, tagId])
+  @@map("project_tags")
+}
