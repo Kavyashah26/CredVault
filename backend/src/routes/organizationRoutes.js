@@ -1,0 +1,28 @@
+const express = require('express');
+const router = express.Router();
+const organizationController = require('../controllers/organizationController');
+const authMiddleware = require('../middlewares/authMiddleware');
+const roleMiddleware = require('../middlewares/roleMiddleware');
+const { addProjectToOrganization } = require('../controllers/projectController');
+
+//done
+// Add a user to an organization (only admin can add a user)
+router.post('/:organizationId/add-member', authMiddleware, roleMiddleware('ADMIN'), organizationController.addUserToOrganization);
+router.post('/', authMiddleware, organizationController.createOrganization);
+router.post('/:organizationId/projects',authMiddleware,  roleMiddleware('ADMIN'),addProjectToOrganization);
+
+
+
+//  ------------------------------
+
+// Create an organization (only admin can create an organization)
+//done
+
+// Get all organizations (accessible to all authenticated users)
+router.get('/', authMiddleware, organizationController.getAllOrganizations);
+
+
+
+
+
+module.exports = router;
