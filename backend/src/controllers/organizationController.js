@@ -24,10 +24,11 @@ exports.createOrganization = async (req, res) => {
 // Get all organizations
 exports.getAllOrganizations = async (req, res) => {
   try {
-    const organizations = await organizationService.getAllOrganizations();
+    const userId = req.user.userId; // Assuming the `authMiddleware` adds the user's ID to `req.user`
+    const organizations = await organizationService.getAllOrganizations(userId);
     res.status(200).json(organizations);
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching organizations:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

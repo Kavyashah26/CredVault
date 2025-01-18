@@ -13,11 +13,13 @@ router.get('/:projectId', authMiddleware,  roleMiddleware(['ADMIN', 'PROJECT_MAN
 router.post('/:projectId/assign', authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MANAGER']), errorHandler(projectController.assignUserToProject));
 
 
+// ------
+
 // Update a project (Protected route)
 router.put('/:projectId', authMiddleware, roleMiddleware('admin', 'project-manager'), errorHandler(projectController.updateProject));
 
 // Delete a project (Protected route)
-router.delete('/:projectId', authMiddleware, roleMiddleware('admin', 'project-manager'), errorHandler(projectController.deleteProject));
+router.delete('/:projectId', authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MANAGER']), errorHandler(projectController.deleteProject));
 
 // Assign a user to a project (Protected route)
 

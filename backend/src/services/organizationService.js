@@ -105,10 +105,85 @@ const createOrganization = async (organizationData, userId) => {
 };
 
 
-const getAllOrganizations = async () => {
-  const organizations = await prisma.organization.findMany();
-  return organizations;
+// const getAllOrganizations = async () => {
+//   const organizations = await prisma.organization.findMany();
+//   return organizations;
+// };
+
+// const getAllOrganizations = async (userId) => {
+//   const organizations = await prisma.organization.findMany({
+//     where: {
+//       OR: [
+//         { createdBy: userId }, // Organizations created by the user
+//         { members: { some: { userId } } }, // Organizations where the user is a member
+//       ],
+//     },
+//     include: {
+//       members: true, // Include members to identify the role of the user
+//     },
+//   });
+
+//   // Add the user's role in each organization
+//   return organizations.map((org) => {
+//     const isAdmin = org.createdBy === userId; // User is admin if they created the organization
+//     const isMember = org.members.some((member) => member.userId === userId);
+
+//     return {
+//       ...org,
+//       userRole: isAdmin ? 'admin' : isMember ? 'member' : null, // Determine the role
+//     };
+//   });
+// };
+
+const getAllOrganizations = async (userId) => {
+
+  console.log("getallorg",userId);
+  
+  const organizations = await prisma.organization.findMany({
+    where: {
+      OR: [
+        { createdBy: userId }, // Organizations created by the user
+        { members: { some: { userId } } }, // Organizations where the user is a member
+      ],
+    },
+    include: {
+      members: true, // Include members to check the user's role
+    },
+  });
+
+  // Add the user's role for each organization
+  // const enrichedOrganizations = organizations.map((org) => {
+  //   // Check if the user is the admin (creator)
+  //   const isAdmin = org.createdBy === userId;
+
+  //   // Check if the user is a member
+  //   const isMember = org.members.some((member) => member.userId === userId);
+
+  //   return {
+  //     ...org,
+  //     userRole: isAdmin ? 'admin' : isMember ? 'member' : null, // Assign the role
+  //   };
+  // });
+
+  // return enrichedOrganizations;
+
+  return organizations.map((org) => {
+    // Determine if the user is an admin or member
+    const isAdmin = org.createdBy === userId;
+    const isMember = org.members.some((member) => member.userId === userId);
+
+    return {
+      id: org.id,
+      name: org.name,
+      userRole: isAdmin ? 'ADMIN' : isMember ? 'MEMBER' : null, // Assign the role
+    };
+  });
+
 };
+
+// module.exports = { getAllOrganizations };
+
+
 
 // const addUserToOrganization = async (organizationId, userId, actingUserId) => {
 //   await prisma.organizationUsers.create({

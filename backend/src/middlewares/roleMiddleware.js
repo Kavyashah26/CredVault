@@ -220,6 +220,9 @@ const prisma = require("../utils/prismaClient");
  * @param {Array<string>} requiredRoles - An array of required roles (e.g., ['ADMIN', 'PROJECT_MANAGER']).
  */
 const roleMiddleware = (requiredRoles) => {
+  console.log("Role middle 1");
+  console.log("Role middle 2");
+  
   return async (req, res, next) => {
     try {
       const userId = req.user.userId; // Extract authenticated user ID from request
@@ -235,12 +238,17 @@ const roleMiddleware = (requiredRoles) => {
           },
         });
 
+        console.log("role middle", member);
+        
+
         if (!member) {
           return res.status(403).json({ error: 'Access denied. You are not a member of this organization.' });
         }
 
         // If user is an admin of the organization, grant access
         if (member.role === 'ADMIN' && requiredRoles.includes('ADMIN')) {
+          console.log("Yes");
+          
           return next(); // Proceed to the next middleware or route handler
         }
 
@@ -250,6 +258,9 @@ const roleMiddleware = (requiredRoles) => {
 
       // Case 2: If projectId is provided (project-level access)
       if (projectId) {
+
+        console.log("checking projectId , ");
+        
         // Check if the user is a project manager for the specified project
         const projectMember = await prisma.projectMember.findFirst({
           where: {
@@ -259,18 +270,53 @@ const roleMiddleware = (requiredRoles) => {
           },
         });
 
+        console.log("projectMember",projectMember);
+        
+
         // If user is a project manager and requiredRoles includes 'PROJECT_MANAGER'
         if (projectMember && requiredRoles.includes('PROJECT_MANAGER')) {
           return next(); // User is a project manager, grant access
         }
 
+        //
+        const projectMemberOrgOwner = await prisma.projectMember.findFirst({
+          where: {
+            projectId,
+            userId,
+            role: 'ADMIN', // Check if the user is a project manager for this project
+          },
+        });
+
+        console.log("projectMemberOrgOwner",projectMemberOrgOwner);
+        
+
+        // If user is a project manager and requiredRoles includes 'PROJECT_MANAGER'
+        if (projectMemberOrgOwner && requiredRoles.includes('ADMIN')) {
+          return next(); // User is a project manager, grant access
+        }
+
         // Also check if the user is an admin in the organization (for broader access)
+        // const organizationMember = await prisma.organizationMember.findFirst({
+        //   where: {
+        //     userId,
+        //   },
+        // });
+
         const organizationMember = await prisma.organizationMember.findFirst({
           where: {
             userId,
           },
+          include: {
+            organization: { // Fetch related Organization
+              select: {
+                createdBy: true, // Include only the createdBy field
+              },
+            },
+          },
         });
-
+        
+        console.log("admin check" , organizationMember);
+        
         // If user is an admin in the organization and requiredRoles includes 'ADMIN'
         if (organizationMember && organizationMember.role === 'ADMIN' && requiredRoles.includes('ADMIN')) {
           return next(); // Proceed to the next middleware or route handler

@@ -46,10 +46,13 @@ exports.updateProject = async (req, res) => {
 
 // Delete a project
 exports.deleteProject = async (req, res) => {
+
+  console.log("Hello delete");
+  
   try {
     const { projectId } = req.params;
 
-    await projectService.deleteProject(projectId, req.user.id);
+    await projectService.deleteProject(projectId, req.user.userId);
     res.status(200).json({ message: 'Project deleted successfully' });
   } catch (error) {
     console.error(error.message);

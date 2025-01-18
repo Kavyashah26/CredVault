@@ -117,20 +117,39 @@ const updateProject = async (projectId, updateData, userId) => {
 /**
  * Delete a project
  */
+// const deleteProject = async (projectId, userId) => {
+//   const project = await prisma.project.delete({
+//     where: { id: projectId },
+//   });
+
+//   // Log activity
+//   await logger.logActivity({
+//     userId,
+//     action: 'DELETE_PROJECT',
+//     details: `Deleted project ${projectId}`,
+//   });
+
+//   return project;
+// };
+
 const deleteProject = async (projectId, userId) => {
-  const project = await prisma.project.delete({
-    where: { id: projectId },
-  });
+  return await prisma.$transaction(async (prisma) => {
+    await prisma.projectMember.deleteMany({ where: { projectId } });
+    await prisma.credential.deleteMany({ where: { projectId } });
+    await prisma.projectTag.deleteMany({ where: { projectId } });
 
-  // Log activity
-  await logger.logActivity({
-    userId,
-    action: 'DELETE_PROJECT',
-    details: `Deleted project ${projectId}`,
-  });
+    const project = await prisma.project.delete({ where: { id: projectId } });
 
-  return project;
+    // await logger.logActivity({
+    //   userId,
+    //   action: "DELETE_PROJECT",
+    //   details: `Deleted project ${projectId}`,
+    // });
+
+    return project;
+  });
 };
+
 
 /**
  * Assign a user to a project
@@ -377,6 +396,37 @@ const getProjectUsers = async (projectId) => {
   return users;
 };
 
+// const addProjectToOrganization = async (organizationId, name, description, actingUserId) => {
+//   // Step 1: Fetch the organization to ensure it exists and get its creator
+//   const organization = await prisma.organization.findUnique({
+//     where: { id: organizationId },
+//     include: {
+//       creator: true, // Include the creator to check if the acting user is the creator
+//     },
+//   });
+
+//   if (!organization) {
+//     throw new Error('Organization not found');
+//   }
+
+//   // Step 2: Check if the acting user is the creator of the organization
+//   if (organization.creator.id !== actingUserId) {
+//     throw new Error('Permission denied: Only the organization creator can add projects');
+//   }
+
+//   // Step 3: Create the new project under the organization
+//   const newProject = await prisma.project.create({
+//     data: {
+//       name: name,
+//       description: description,
+//       organizationId: organizationId,
+//       createdBy: actingUserId, // Set the project creator as the acting user
+//     },
+//   });
+
+//   return newProject;
+// };
+
 const addProjectToOrganization = async (organizationId, name, description, actingUserId) => {
   // Step 1: Fetch the organization to ensure it exists and get its creator
   const organization = await prisma.organization.findUnique({
@@ -405,8 +455,20 @@ const addProjectToOrganization = async (organizationId, name, description, actin
     },
   });
 
+  // Step 4: Add the creator as a member of the project
+  await prisma.projectMember.create({
+    data: {
+      projectId: newProject.id,
+      userId: actingUserId,
+      role: 'ADMIN', // You can customize the role (e.g., OWNER, ADMIN, etc.)
+    },
+  });
+
   return newProject;
 };
+
+
+
 module.exports = {
   createProject,
   getAllProjects,
