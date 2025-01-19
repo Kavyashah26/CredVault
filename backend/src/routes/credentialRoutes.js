@@ -3,6 +3,7 @@ const credentialController = require('../controllers/credentialController');
 const authMiddleware = require('../middlewares/authMiddleware');  // Authentication middleware
 const roleMiddleware = require('../middlewares/roleMiddleware');  // Role-based authorization middleware
 const {errorHandler} = require('../middlewares/errorHandler');  // Error handling middleware
+const checkProjectMembership = require('../middlewares/membershipMiddleware');
 
 const router = express.Router();
 
@@ -15,6 +16,13 @@ router.get('/project/:projectId', authMiddleware, roleMiddleware(['ADMIN', 'PROJ
 
 
 // -------------
+
+router.get(
+    '/:projectId/:credentialId',
+    authMiddleware,
+    checkProjectMembership, // Ensure the user is part of the project
+    credentialController.getCredentialById
+  );
 
 // Update a credential (Protected route)
 router.put('/:id', authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MANAGER']), errorHandler(credentialController.updateCredential));

@@ -96,6 +96,44 @@ const createCredential = async (credentialData, userId, projectId) => {
 };
 
 
+const getCredentialById = async (credentialId, projectId) => {
+  try {
+    // Fetch credential by ID and projectId to ensure it's part of the project
+    const credential = await prisma.credential.findFirst({
+      where: {
+        id: credentialId,
+        projectId, // Ensure the credential belongs to the project
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!credential) {
+      return null; // Return null if the credential is not found
+    }
+
+    return {
+      id: credential.id,
+      name: credential.name,
+      type: credential.type,
+      description: credential.description,
+      createdBy: {
+        id: credential.creator.id,
+        name: credential.creator.name,
+      },
+      value: decrypt(credential.value, CREDENTIAL_SECRET)
+    };
+  } catch (error) {
+    console.error('Error fetching credential by ID:', error);
+    throw new Error('Failed to fetch credential');
+  }
+};
 
 // const getCredentialsByProject = async (projectId) => {
 //   const credentials = await prisma.credentials.findMany({ where: { projectId } });
@@ -105,19 +143,51 @@ const createCredential = async (credentialData, userId, projectId) => {
 //   }));
 // };
 
+// const getCredentialsByProject = async (projectId) => {
+//   try {
+//     // Fetch credentials by projectId
+//     const credentials = await prisma.credential.findMany({
+//       where: { projectId }
+//     });
+
+//     console.log("credentials",credentials);
+    
+//     // Map over the credentials to decrypt the 'value' field and return the transformed data
+//     return credentials.map((cred) => ({
+//       ...cred,
+//       value: decrypt(cred.value, CREDENTIAL_SECRET), // Decrypt the value using a decryption function
+//     }));
+//   } catch (error) {
+//     console.error('Error fetching credentials:', error);
+//     throw new Error('Failed to fetch credentials');
+//   }
+// };
+
 const getCredentialsByProject = async (projectId) => {
   try {
-    // Fetch credentials by projectId
+    // Fetch credentials by projectId and include the creator's name
     const credentials = await prisma.credential.findMany({
-      where: { projectId }
+      where: { projectId },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true, // Assuming the User model has a 'name' field
+          },
+        },
+      },
     });
 
-    console.log("credentials",credentials);
-    
-    // Map over the credentials to decrypt the 'value' field and return the transformed data
+    // Map over the credentials to transform the data
     return credentials.map((cred) => ({
-      ...cred,
-      value: decrypt(cred.value, CREDENTIAL_SECRET), // Decrypt the value using a decryption function
+      id: cred.id,
+      name: cred.name,
+      type: cred.type,
+      description: cred.description,
+      createdBy: {
+        id: cred.creator.id,
+        name: cred.creator.name, // Include the creator's name
+      },
     }));
   } catch (error) {
     console.error('Error fetching credentials:', error);
@@ -167,4 +237,5 @@ module.exports = {
   getCredentialsByProject,
   updateCredential,
   deleteCredential,
+  getCredentialById
 };

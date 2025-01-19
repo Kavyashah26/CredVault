@@ -42,6 +42,28 @@ exports.getCredentialsByProject = async (req, res) => {
   }
 };
 
+
+exports.getCredentialById = async (req, res) => {
+  try {
+    const { credentialId, projectId } = req.params; // Extract credentialId and projectId
+
+    // Call the service to fetch the credential
+    const credential = await credentialService.getCredentialById(credentialId, projectId);
+
+    if (!credential) {
+      return res.status(404).json({ message: 'Credential not found' });
+    }
+
+    res.status(200).json(credential); // Send the response
+  } catch (error) {
+    console.error('Error fetching credential by ID:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+
+
 // Update a credential
 exports.updateCredential = async (req, res) => {
   try {
