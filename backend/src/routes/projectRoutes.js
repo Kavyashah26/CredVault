@@ -12,6 +12,10 @@ router.get('/:projectId', authMiddleware,  roleMiddleware(['ADMIN', 'PROJECT_MAN
 
 router.post('/:projectId/assign', authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MANAGER']), errorHandler(projectController.assignUserToProject));
 
+router.delete('/:projectId/users/:userId',authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MANAGER']), errorHandler(projectController.removeProjectMember));
+
+router.get('/:projectId/stats',authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MANAGER']), projectController.getProjectStats);
+
 
 // ------
 

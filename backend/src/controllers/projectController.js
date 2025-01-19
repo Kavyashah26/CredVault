@@ -151,3 +151,38 @@ exports.addProjectToOrganization = async (req, res) => {
     res.status(500).json({ error: 'Failed to add project' });
   }
 };
+
+
+exports.removeProjectMember = async (req, res) => {
+  const { projectId, userId } = req.params;
+
+  try {
+    const result = await projectService.removeProjectMember(projectId, userId);
+
+    if (!result) {
+      return res.status(404).json({ error: 'Member not found or already removed from the project' });
+    }
+
+    res.status(200).json({ message: 'Member removed from the project successfully' });
+  } catch (error) {
+    console.error('Error removing project member:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.getProjectStats = async (req, res) => {
+  const { projectId } = req.params;
+
+  try {
+    const stats = await projectService.getProjectStats(projectId);
+
+    if (!stats) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error('Error getting project stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

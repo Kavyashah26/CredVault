@@ -468,6 +468,73 @@ const addProjectToOrganization = async (organizationId, name, description, actin
 };
 
 
+const removeProjectMember = async (projectId, userId) => {
+  try {
+    // Check if the user is a member of the project
+    const projectMember = await prisma.projectMember.findUnique({
+      where: {
+        projectId_userId: {
+          projectId: projectId,
+          userId: userId,
+        },
+      },
+    });
+
+    if (!projectMember) {
+      return null;  // Return null if the member is not part of the project
+    }
+
+    // Remove the member from the project
+    await prisma.projectMember.delete({
+      where: {
+        projectId_userId: {
+          projectId: projectId,
+          userId: userId,
+        },
+      },
+    });
+
+    return true;  // Successfully removed the member
+  } catch (error) {
+    console.error('Error in removeProjectMember service:', error);
+    throw new Error('Failed to remove project member');
+  }
+};
+
+
+const getProjectStats = async (projectId) => {
+  try {
+    // Get project stats: number of members and number of credentials
+    const stats = await prisma.project.findUnique({
+      where: { id: projectId },
+      select: {
+        id: true,
+        name: true,
+        _count: {
+          select: {
+            members: true,      // Count of members in the project
+            credentials: true,  // Count of credentials in the project
+          },
+        },
+      },
+    });
+
+    if (!stats) {
+      return null;  // If project is not found
+    }
+
+    return {
+      projectId: stats.id,
+      projectName: stats.name,
+      memberCount: stats._count.members,
+      credentialCount: stats._count.credentials,
+    };
+  } catch (error) {
+    console.error('Error in getProjectStats service:', error);
+    throw new Error('Failed to fetch project stats');
+  }
+};
+
 
 module.exports = {
   createProject,
@@ -477,5 +544,7 @@ module.exports = {
   deleteProject,
   assignUserToProject,
   getProjectUsers,
-  addProjectToOrganization
+  addProjectToOrganization,
+  removeProjectMember,
+  getProjectStats
 };

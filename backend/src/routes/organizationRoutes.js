@@ -20,6 +20,9 @@ router.get('/:organizationId', authMiddleware,checkOrganizationMembership, organ
 router.delete('/:organizationId/members/:userId', authMiddleware,roleMiddleware('ADMIN'), organizationController.deleteOrganizationMember);
 
 
+router.get('/:organizationId/stats',authMiddleware,roleMiddleware('ADMIN'), organizationController.getOrganizationStats);
+
+
 //  ------------------------------
 
 //done

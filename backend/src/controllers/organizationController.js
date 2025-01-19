@@ -80,3 +80,21 @@ exports.deleteOrganizationMember = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+
+exports.getOrganizationStats = async (req, res) => {
+  const { organizationId } = req.params;
+
+  try {
+    const stats = await organizationService.getOrganizationStats(organizationId);
+
+    if (!stats) {
+      return res.status(404).json({ error: 'Organization not found' });
+    }
+
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error('Error getting organization stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

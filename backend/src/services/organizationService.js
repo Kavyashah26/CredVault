@@ -201,10 +201,99 @@ const deleteOrganizationMember = async (organizationId, userId) => {
   }
 };
 
+// const getOrganizationStats = async (organizationId) => {
+//   try {
+//     // Get organization stats: number of members, number of projects, and number of credentials
+//     const stats = await prisma.organization.findUnique({
+//       where: { id: organizationId },
+//       select: {
+//         id: true,
+//         name: true,
+//         _count: {
+//           select: {
+//             members: true,      // Count of members in the organization
+//             projects: true,     // Count of projects in the organization
+//             credentials: true,  // Count of credentials in the organization
+//           },
+//         },
+//       },
+//     });
+
+//     if (!stats) {
+//       return null;  // If organization is not found
+//     }
+
+//     return {
+//       organizationId: stats.id,
+//       organizationName: stats.name,
+//       memberCount: stats._count.members,
+//       projectCount: stats._count.projects,
+//       credentialCount: stats._count.credentials,
+//     };
+//   } catch (error) {
+//     console.error('Error in getOrganizationStats service:', error);
+//     throw new Error('Failed to fetch organization stats');
+//   }
+// };
+
+const getOrganizationStats = async (organizationId) => {
+  try {
+    // Fetch organization details (name, id, etc.)
+    const organization = await prisma.organization.findUnique({
+      where: {
+        id: organizationId,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    if (!organization) {
+      return null; // Return null if the organization is not found
+    }
+
+    // Fetch counts for related fields
+    const memberCount = await prisma.organizationMember.count({
+      where: {
+        organizationId: organizationId,
+      },
+    });
+
+    const projectCount = await prisma.project.count({
+      where: {
+        organizationId: organizationId,
+      },
+    });
+
+    const credentialCount = await prisma.credential.count({
+      where: {
+        project: {
+          organizationId: organizationId,
+        },
+      },
+    });
+
+    // Return stats in a structured way
+    return {
+      organizationId: organization.id,
+      organizationName: organization.name,
+      memberCount: memberCount,
+      projectCount: projectCount,
+      credentialCount: credentialCount,
+    };
+  } catch (error) {
+    console.error('Error in getOrganizationStats service:', error);
+    throw new Error('Failed to fetch organization stats');
+  }
+};
+
+
 module.exports = {
   createOrganization,
   getAllOrganizations,
   addUserToOrganization,
   getOrganizationById,
-  deleteOrganizationMember
+  deleteOrganizationMember,
+  getOrganizationStats
 };
