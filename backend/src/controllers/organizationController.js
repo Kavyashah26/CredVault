@@ -45,3 +45,38 @@ exports.addUserToOrganization = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.getOrganizationById = async (req, res) => {
+  const { organizationId } = req.params;
+
+  try {
+    const organization = await organizationService.getOrganizationById(organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ message: 'Organization not found' });
+    }
+
+    res.status(200).json(organization);
+  } catch (error) {
+    console.error('Error in getOrganizationById controller:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+exports.deleteOrganizationMember = async (req, res) => {
+  const { organizationId, userId } = req.params;
+
+  try {
+    // Check if the member exists in the organization
+    const result = await organizationService.deleteOrganizationMember(organizationId, userId);
+
+    if (!result) {
+      return res.status(404).json({ message: 'Member not found in the organization' });
+    }
+
+    res.status(200).json({ message: 'Member removed successfully' });
+  } catch (error) {
+    console.error('Error in deleteOrganizationMember controller:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};

@@ -4,6 +4,7 @@ const organizationController = require('../controllers/organizationController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const roleMiddleware = require('../middlewares/roleMiddleware');
 const { addProjectToOrganization } = require('../controllers/projectController');
+const { checkOrganizationMembership } = require('../middlewares/membershipMiddleware');
 
 //done
 // Add a user to an organization (only admin can add a user)
@@ -13,6 +14,10 @@ router.post('/:organizationId/projects',authMiddleware,  roleMiddleware('ADMIN')
 // Get all organizations (accessible to all authenticated users)
 router.get('/', authMiddleware, organizationController.getAllOrganizations);
 
+router.get('/:organizationId', authMiddleware,checkOrganizationMembership, organizationController.getOrganizationById);
+
+
+router.delete('/:organizationId/members/:userId', authMiddleware,roleMiddleware('ADMIN'), organizationController.deleteOrganizationMember);
 
 
 //  ------------------------------

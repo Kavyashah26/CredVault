@@ -163,9 +163,41 @@ const getCredentialById = async (credentialId, projectId) => {
 //   }
 // };
 
+// const getCredentialsByProject = async (projectId) => {
+//   try {
+//     // Fetch credentials by projectId and include the creator's name
+//     const credentials = await prisma.credential.findMany({
+//       where: { projectId },
+//       include: {
+//         creator: {
+//           select: {
+//             id: true,
+//             name: true, // Assuming the User model has a 'name' field
+//           },
+//         },
+//       },
+//     });
+
+//     // Map over the credentials to transform the data
+//     return credentials.map((cred) => ({
+//       id: cred.id,
+//       name: cred.name,
+//       type: cred.type,
+//       description: cred.description,
+//       createdBy: {
+//         id: cred.creator.id,
+//         name: cred.creator.name, // Include the creator's name
+//       },
+//     }));
+//   } catch (error) {
+//     console.error('Error fetching credentials:', error);
+//     throw new Error('Failed to fetch credentials');
+//   }
+// };
+
 const getCredentialsByProject = async (projectId) => {
   try {
-    // Fetch credentials by projectId and include the creator's name
+    // Fetch credentials by projectId and include creator's name and tags
     const credentials = await prisma.credential.findMany({
       where: { projectId },
       include: {
@@ -173,6 +205,16 @@ const getCredentialsByProject = async (projectId) => {
           select: {
             id: true,
             name: true, // Assuming the User model has a 'name' field
+          },
+        },
+        tags: {
+          include: {
+            tag: {
+              select: {
+                id: true,
+                name: true, // Assuming the Tag model has a 'name' field
+              },
+            },
           },
         },
       },
@@ -188,6 +230,10 @@ const getCredentialsByProject = async (projectId) => {
         id: cred.creator.id,
         name: cred.creator.name, // Include the creator's name
       },
+      tags: cred.tags.map((tagRelation) => ({
+        id: tagRelation.tag.id,
+        name: tagRelation.tag.name,
+      })), // Extract tags from the relation
     }));
   } catch (error) {
     console.error('Error fetching credentials:', error);

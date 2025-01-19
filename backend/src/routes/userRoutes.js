@@ -10,6 +10,7 @@ const router = express.Router();
 router.get('/me', authMiddleware, errorHandler(userController.getLoggedInUserDetails));
 router.post('/register', errorHandler(userController.registerUser));
 router.post('/login', errorHandler(userController.loginUser));
+router.get('/projects', authMiddleware, errorHandler(userController.getUserProjects));
 
 
 // Get all users (Protected route, only admin can access this)

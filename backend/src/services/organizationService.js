@@ -431,9 +431,91 @@ const addUserToOrganization = async (organizationId, userId, actingUserId) => {
   return updatedOrganization;
 };
 
+const getOrganizationById = async (organizationId) => {
+  try {
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizationId },
+      include: {
+        creator: { select: { id: true, name: true } }, // Include creator info
+        members: {
+          include: {
+            user: {
+              select: { id: true, name: true } // Assuming you want to include member names
+            }
+          }
+        }
+      }
+    });
+
+    return organization;
+  } catch (error) {
+    console.error('Error in getOrganizationById service:', error);
+    throw new Error('Failed to fetch organization details');
+  }
+};
+
+
+
+// const deleteOrganizationMember = async (organizationId, userId) => {
+//   try {
+//     // Delete the member from the organization using organizationId and userId as composite unique key
+//     const deletedMember = await prisma.organizationMember.delete({
+//       where: {
+//         organizationId_userId: { // This is the composite unique constraint
+//           organizationId: organizationId,
+//           userId: userId,
+//         },
+//       },
+//     });
+
+//     if (!deletedMember) {
+//       return null; // If no member was deleted, return null
+//     }
+
+//     return true; // Member successfully removed
+//   } catch (error) {
+//     console.error('Error in deleteOrganizationMember service:', error);
+//     throw new Error('Failed to remove member from the organization');
+//   }
+// };
+
+const deleteOrganizationMember = async (organizationId, userId) => {
+  try {
+    // Step 1: Remove the user from all projects under this organization
+    await prisma.projectMember.deleteMany({
+      where: {
+        userId: userId, // Remove user from any project they are part of
+        project: {
+          organizationId: organizationId, // Only affect projects under the specified organization
+        },
+      },
+    });
+
+    // Step 2: Delete the user from the organization
+    const deletedMember = await prisma.organizationMember.delete({
+      where: {
+        organizationId_userId: { // Composite unique constraint for organization-member
+          organizationId: organizationId,
+          userId: userId,
+        },
+      },
+    });
+
+    if (!deletedMember) {
+      return null; // If no member was deleted, return null
+    }
+
+    return true; // Member successfully removed from both organization and projects
+  } catch (error) {
+    console.error('Error in deleteOrganizationMember service:', error);
+    throw new Error('Failed to remove member from the organization');
+  }
+};
 
 module.exports = {
   createOrganization,
   getAllOrganizations,
   addUserToOrganization,
+  getOrganizationById,
+  deleteOrganizationMember
 };

@@ -28,5 +28,35 @@ const checkProjectMembership = async (req, res, next) => {
   }
 };
 
-module.exports = checkProjectMembership;
+const checkOrganizationMembership = async (req, res, next) => {
+    const { organizationId } = req.params;
+    const userId = req.user?.userId; // Assuming the user ID is available in `req.user` after authentication
+  
+    try {
+      // Check if the user is a member of the organization
+      const membership = await prisma.organizationMember.findFirst({
+        where: {
+          organizationId,
+          userId,
+        },
+      });
+  
+      if (!membership) {
+        return res.status(403).json({ message: 'Access denied: You are not a member of this organization.' });
+      }
+  
+      // Add the membership details to the request object if needed
+      req.organizationMembership = membership;
+  
+      next(); // Proceed to the next middleware or route handler
+    } catch (error) {
+      console.error('Error checking organization membership:', error);
+      res.status(500).json({ message: 'Failed to check organization membership' });
+    }
+  };
+  
+
+module.exports = {checkProjectMembership,
+    checkOrganizationMembership
+}
 

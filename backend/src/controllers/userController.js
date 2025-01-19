@@ -108,3 +108,21 @@ exports.getLoggedInUserDetails = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+exports.getUserProjects = async (req, res) => {
+  try {
+    const userId = req.user.userId; // Assumes the authenticated user's ID is available in req.user
+    const projects = await userService.getUserProjects(userId);
+    res.status(200).json({
+      success: true,
+      data: projects,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user projects.',
+    });
+  }
+};
