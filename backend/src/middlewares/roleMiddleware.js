@@ -220,8 +220,8 @@ const prisma = require("../utils/prismaClient");
  * @param {Array<string>} requiredRoles - An array of required roles (e.g., ['ADMIN', 'PROJECT_MANAGER']).
  */
 const roleMiddleware = (requiredRoles) => {
-  console.log("Role middle 1");
-  console.log("Role middle 2");
+  // console.log("Role middle 1");
+  // console.log("Role middle 2");
   
   return async (req, res, next) => {
     try {
@@ -238,7 +238,7 @@ const roleMiddleware = (requiredRoles) => {
           },
         });
 
-        console.log("role middle", member);
+        // console.log("role middle", member);
         
 
         if (!member) {
