@@ -34,6 +34,10 @@ app.use('/api/organizations', organizationRoutes);
 app.use('/api/credentials', credentialRoutes);
 app.use('/api/tags', tagRoutes);
 
+app.get('/', (req, res) => {
+  res.status(200).send('Working');
+});
+
 // Catch-all error handler (if no route matches)
 app.use((req, res, next) => {
   res.status(404).json({ error: 'Route not found' });
