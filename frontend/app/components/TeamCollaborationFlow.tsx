@@ -5,13 +5,25 @@ import { motion } from 'framer-motion'
 import { User, Users, Shield, Key, Eye } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 
-const roles = [
+// Define types for roles and actions
+interface Role {
+  name: string
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  color: string
+}
+
+interface Action {
+  name: string
+  allowedRoles: string[]
+}
+
+const roles: Role[] = [
   { name: 'Admin', icon: Shield, color: 'bg-red-500' },
   { name: 'Moderator', icon: Key, color: 'bg-yellow-500' },
   { name: 'Member', icon: Eye, color: 'bg-green-500' },
 ]
 
-const actions = [
+const actions: Action[] = [
   { name: 'Create Project', allowedRoles: ['Admin'] },
   { name: 'Invite Team', allowedRoles: ['Admin', 'Moderator'] },
   { name: 'Add Credential', allowedRoles: ['Admin', 'Moderator'] },
@@ -20,10 +32,10 @@ const actions = [
 ]
 
 export default function TeamCollaborationFlow() {
-  const [currentRole, setCurrentRole] = useState(roles[0])
-  const [currentAction, setCurrentAction] = useState(null)
+  const [currentRole, setCurrentRole] = useState<Role>(roles[0])
+  const [currentAction, setCurrentAction] = useState<Action | null>(null)
 
-  const selectAction = (action) => {
+  const selectAction = (action: Action) => {
     setCurrentAction(action)
   }
 
@@ -38,7 +50,7 @@ export default function TeamCollaborationFlow() {
             variant={currentRole.name === role.name ? 'default' : 'outline'}
             className="flex items-center"
           >
-            <role.icon className="mr-2" size={16} />
+            <role.icon className="mr-2" width={16} height={16} />
             {role.name}
           </Button>
         ))}
@@ -71,4 +83,3 @@ export default function TeamCollaborationFlow() {
     </div>
   )
 }
-
