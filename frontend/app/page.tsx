@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ArrowRight, Lock, Users, Layers, Key } from 'lucide-react'
@@ -9,10 +10,12 @@ import CollaborationSimulator from './components/CollaborationSimulator'
 import CredentialLifecycleVisualizer from './components/CredentialLifecycleVisualizer'
 import TeamCollaborationFlow from './components/TeamCollaborationFlow'
 import CustomerSuccessStories from './components/CustomerSuccessStories'
+import { useRouter } from 'next/navigation'
 
-Navbar
+
 
 export default function LandingPage() {
+  const router = useRouter()
   const [scrollY, setScrollY] = useState(0)
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export default function LandingPage() {
             Manage API keys, secrets, and passwords across your organization with granular access control.
           </p>
           <div className="flex justify-center">
-            <Button className="bg-black text-white hover:bg-gray-800">
+            <Button className="bg-black text-white hover:bg-gray-800" onClick={()=>router.push('/signup')}>
               Get Started <ArrowRight className="ml-2" size={16} />
             </Button>
           </div>
@@ -53,14 +56,14 @@ export default function LandingPage() {
       <section id="features" className="py-20  bg-gray-100">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold mb-12 text-center">Key Features</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols- md:grid-cols-2 gap-8">
             {[
               { icon: Users, title: "Role-Based Access", description: "Admin, moderator, and member roles with customizable permissions." },
               { icon: Layers, title: "Hierarchical Structure", description: "Organize credentials by organization, project, and individual levels." },
               { icon: Lock, title: "Secure Storage", description: "Encrypted storage for API keys, secret keys, emails, and passwords." },
               { icon: Key, title: "Granular Permissions", description: "Control access to specific fields for each user role." }
             ].map((feature, index) => (
-              <div key={index} className="border border-gray-200 p-6 rounded-lg flex items-start">
+              <div key={index} className="border-2 border-black  p-6 rounded-lg flex items-start">
                 <feature.icon className="mr-4 text-gray-600" size={24} />
                 <div>
                   <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
