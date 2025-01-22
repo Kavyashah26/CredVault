@@ -28,7 +28,7 @@ export default function SignupPage() {
     }
     try {
           // Make the API call to login the user
-          const response = await fetch('http://localhost:5000/api/users/register', {
+          const response = await fetch('https://admin-credvault.vercel.app/api/users/register', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
