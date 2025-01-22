@@ -158,24 +158,81 @@ const updateUserRole = async (userId, role) => {
 
   return user;
 };
+// const getLoggedInUserDetails = async (userId) => {
+  
+  
+//   const user = await prisma.user.findUnique({
+//     where: { id: userId },
+//     include: {
+//       projects: {
+//         select: {
+//           projectId: true,
+//           // name: true,
+//           role: true, // Assuming there's a role field in the relation
+//         },
+//       },
+//       organizations: {
+//         select: {
+//           organizationId: true,
+//           // name: true,
+//           role: true, // Assuming there's a role field in the relation
+//         },
+//       },
+//     },
+//   });
+
+//   if (!user) {
+//     throw new Error('User not found');
+//   }
+
+//   return {
+//     id: user.id,
+//     name: user.name,
+//     email: user.email,
+//     role: user.role,
+//     projects: user.projects,
+//     organizations: user.organizations,
+//   };
+// };
+
 const getLoggedInUserDetails = async (userId) => {
-  
-  
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
       projects: {
         select: {
           projectId: true,
-          // name: true,
-          role: true, // Assuming there's a role field in the relation
+          role: true,
         },
       },
       organizations: {
         select: {
           organizationId: true,
-          // name: true,
-          role: true, // Assuming there's a role field in the relation
+          role: true,
+          addedAt: true,
+          organization: {
+            select: {
+              name: true,
+              _count: {
+                select: {
+                  members: true, // Count of all members in the organization
+                  projects: true, // Count of all projects in the organization
+                },
+              },
+              projects: {
+                where: {
+                  members: {
+                    some: {
+                      userId, // Filter to count only projects this user is part of
+                    },
+                  },
+                },
+                select: {
+                  id: true,
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -185,13 +242,24 @@ const getLoggedInUserDetails = async (userId) => {
     throw new Error('User not found');
   }
 
+  // Process organizations to structure the data properly
+  const organizations = user.organizations.map((org) => ({
+    organizationId: org.organizationId,
+    role: org.role,
+    addedAt: org.addedAt,
+    name: org.organization.name,
+    memberCount: org.organization._count.members,
+    totalProjects: org.organization._count.projects,
+    userProjectsCount: org.organization.projects.length,
+  }));
+
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     role: user.role,
     projects: user.projects,
-    organizations: user.organizations,
+    organizations,
   };
 };
 

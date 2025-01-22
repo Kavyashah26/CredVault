@@ -97,6 +97,8 @@ exports.updateUserRole = async (req, res) => {
 
 // Get details about the logged-in user
 exports.getLoggedInUserDetails = async (req, res) => {
+  console.log(("in me"));
+  
   try {
     const userId = req.user.userId; // Assuming authMiddleware attaches the logged-in user's ID to `req.user`
     console.log("userId",userId);
