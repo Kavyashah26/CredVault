@@ -98,3 +98,23 @@ exports.getOrganizationStats = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.getOrgUserProjects = async (req, res) => {
+  try {
+    const userId = req.user.userId; // Assumes the authenticated user's ID is in req.user
+    const orgId = req.params.orgId; // Assumes orgId is passed as a URL parameter
+
+    const projects = await organizationService.getOrgUserProjects(orgId, userId);
+
+    res.status(200).json({
+      success: true,
+      data: projects,
+    });
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch projects for the organization.',
+    });
+  }
+};

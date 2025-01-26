@@ -278,6 +278,24 @@ const getUserProjects = async (userId) => {
   });
 };
 
+const getOrgUserProjects = async (orgId, userId) => {
+  return await prisma.project.findMany({
+    where: {
+      organizationId: orgId, // Matches projects in the given organization
+      members: {
+        some: {
+          userId, // Ensures the user is a member of the project
+        },
+      },
+    },
+    include: {
+      organization: true, // Include organization details if needed
+    },
+  });
+};
+
+
+
 
 module.exports = {
   registerUser,
@@ -288,5 +306,5 @@ module.exports = {
   changePassword,
   updateUserRole,
   getLoggedInUserDetails,
-  getUserProjects
+  getUserProjects,
 };

@@ -22,6 +22,9 @@ router.delete('/:organizationId/members/:userId', authMiddleware,roleMiddleware(
 
 router.get('/:organizationId/stats',authMiddleware,roleMiddleware('ADMIN'), organizationController.getOrganizationStats);
 
+router.get('/:orgId/user', authMiddleware, organizationController.getOrgUserProjects);
+
+
 
 //  ------------------------------
 

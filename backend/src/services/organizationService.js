@@ -289,11 +289,53 @@ const getOrganizationStats = async (organizationId) => {
 };
 
 
+const getOrgUserProjects = async (orgId, userId) => {
+  const projects = await prisma.project.findMany({
+    where: {
+      organizationId: orgId,
+      members: {
+        some: { userId },
+      },
+    },
+    include: {
+      organization: {
+        select: {
+          name: true, 
+        },
+      },
+      members: {
+        select: {
+          userId: true,
+          role: true, // Include the user's role
+        },
+      },
+    },
+  });
+
+  return projects.map((project) => {
+    const userRole = project.members.find((member) => member.userId === userId)?.role;
+    return {
+      id: project.id,
+      name: project.name,
+      description: project.description, 
+      orgName: project.organization.name, 
+      role: userRole || 'Unknown',
+      memberCount: project.members.length,
+    };
+  });
+};
+
+
+
+
+
+
 module.exports = {
   createOrganization,
   getAllOrganizations,
   addUserToOrganization,
   getOrganizationById,
   deleteOrganizationMember,
-  getOrganizationStats
+  getOrganizationStats,
+  getOrgUserProjects
 };

@@ -131,9 +131,10 @@ exports.getProjectUsers = async (req, res) => {
 exports.addProjectToOrganization = async (req, res) => {
   try {
     const { organizationId } = req.params;
-    const { name, description } = req.body;
+    const { name, description,c } = req.body;
     const actingUserId = req.user.userId; // Assuming user is authenticated
-
+    console.log(req.body);
+    
     // Call the service to add the project to the organization
     const newProject = await projectService.addProjectToOrganization(
       organizationId,
