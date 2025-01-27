@@ -238,7 +238,7 @@ const deleteOrganizationMember = async (organizationId, userId) => {
 
 const getOrganizationStats = async (organizationId) => {
   try {
-    // Fetch organization details (name, id, etc.)
+    
     const organization = await prisma.organization.findUnique({
       where: {
         id: organizationId,
@@ -274,7 +274,6 @@ const getOrganizationStats = async (organizationId) => {
       },
     });
 
-    // Return stats in a structured way
     return {
       organizationId: organization.id,
       organizationName: organization.name,

@@ -3,8 +3,8 @@ const userService = require('../services/userService');
 // Register a new user
 exports.registerUser = async (req, res) => {
   try {
-    const { email, password, role,name } = req.body;
-    const user = await userService.registerUser({ email, password, role,name });
+    const { email, password, fingerprint,name,role } = req.body;
+    const user = await userService.registerUser({ email, password, fingerprint,name });
     res.status(201).json({ message: 'User registered successfully', user });
   } catch (error) {
     console.error(error);
@@ -16,17 +16,25 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const token = await userService.loginUser(email, password);
+    const { email, password,fingerprint } = req.body;
+    // const token = await userService.loginUser(email, password,fingerprint);
 
-    res.status(200).json({
-      message: 'Login successful',
-      token,
-    });
+    const result = await userService.loginUser(email, password, fingerprint);
+
+    if (result.success) {
+      return res.status(200).json({
+        message: "Login successful",
+        token: result.token,
+      });
+    } else {
+      return res.status(400).json({
+        message: result.message,
+      });
+    }
   } catch (error) {
     console.error(error);
-    res.status(401).json({
-      error: 'Invalid credentials. Please check your email and password.',
+    return res.status(500).json({
+      message: "An error occurred during login. Please try again.",
     });
   }
 };

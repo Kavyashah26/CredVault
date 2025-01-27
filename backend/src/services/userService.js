@@ -5,15 +5,25 @@ const logger = require('../utils/logger');
 
 const prisma = require('../utils/prismaClient')
 
+const {sendSecurityCodeEmail}=require("../utils/sendSecurityCodeEmail");
 /**
  * Register a new user
  */
 const registerUser = async (userData) => {
-  const { email, password, role,name } = userData;
+  const { email, password, fingerprint,name } = userData;
+  console.log("fingerprint",fingerprint);
+  
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = await prisma.user.create({
-    data: { email, password: hashedPassword, role,name },
+    data: { email, password: hashedPassword,name },
+  });
+
+  await prisma.userFingerprint.create({
+    data: {
+      userId: user.id,
+      fingerprint, // Save the user's browser fingerprint
+    },
   });
 
   // Log activity
@@ -48,12 +58,15 @@ const registerUser = async (userData) => {
 //   return token;
 // };
 
-const loginUser = async (email, password) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+const loginUser = async (email, password,fingerprint) => {
+  
+  try{const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
     console.log("User not found");
-    throw new Error('Invalid credentials');
+    // return res.status(400).json({ success: false, message: "User not found!" });
+    return { success: false, message:"User not found!" };
+
   }
 
   console.log("Stored hash: ", user.password); // Log stored hash
@@ -63,10 +76,36 @@ const loginUser = async (email, password) => {
   console.log("Password valid: ", isPasswordValid); // Check the result of bcrypt comparison
 
   if (!isPasswordValid) {
-    throw new Error('Invalid credentials');
+    // return res.status(400).json({ success: false, message: "Invalid password!" });
+    // throw new Error("Invalid password");
+    return { success: false, message:"Invalid password" };
   }
 
-  const token = jwt.generateToken(user.id, user.role);
+  const storedFingerprint = await prisma.userFingerprint.findFirst({
+    where: {
+      userId: user.id,
+      fingerprint,
+    },
+  });
+
+  if (storedFingerprint) {
+    // Fingerprint is valid, proceed with login and generate token
+    console.log("Yes, found!!");
+    
+    const token = jwt.generateToken(user);
+    // return res.status(200).json({ success: true, token });
+    return { success: true, token };
+  }
+
+  sendSecurityCodeEmail(user.email, fingerprint)
+  return {
+    success: false,
+    message: "New device detected. A security code has been sent to your email.",
+  };
+} catch (error) {
+  console.error(error);
+  throw error;
+}
 
   // Log activity
   // await logger.logActivity({
@@ -74,8 +113,6 @@ const loginUser = async (email, password) => {
   //   action: 'LOGIN_USER',
   //   details: `User with email ${email} logged in`,
   // });
-
-  return token;
 };
 
 /**
