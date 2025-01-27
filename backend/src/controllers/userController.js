@@ -27,6 +27,12 @@ exports.loginUser = async (req, res) => {
         token: result.token,
       });
     } else {
+      if(result.code){
+        return res.status(400).json({
+          message: result.message,
+          code:result.code
+        });
+      }
       return res.status(400).json({
         message: result.message,
       });

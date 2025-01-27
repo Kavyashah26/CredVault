@@ -97,10 +97,11 @@ const loginUser = async (email, password,fingerprint) => {
     return { success: true, token };
   }
 
-  sendSecurityCodeEmail(user.email, fingerprint)
+  const reply=sendSecurityCodeEmail(user.email, fingerprint)
   return {
     success: false,
     message: "New device detected. A security code has been sent to your email.",
+    code:1122
   };
 } catch (error) {
   console.error(error);
