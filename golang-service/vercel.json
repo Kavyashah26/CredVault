@@ -1,0 +1,11 @@
+{
+    "version": 2,
+    "builds": [
+      { "src": "api/main.go", "use": "@vercel/go" }
+    ],
+    "routes": [
+      { "src": "/api/send-code", "dest": "/api/main.go" },
+      { "src": "/api/verify-code", "dest": "/api/main.go" }
+    ]
+  }
+  
