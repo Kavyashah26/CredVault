@@ -9,6 +9,12 @@ const { checkOrganizationMembership } = require('../middlewares/membershipMiddle
 //done
 // Add a user to an organization (only admin can add a user)
 router.post('/:organizationId/add-member', authMiddleware, roleMiddleware('ADMIN'), organizationController.addUserToOrganization);
+
+
+router.post('/:organizationId/invite', authMiddleware, roleMiddleware('ADMIN'), organizationController.inviteUserToOrganization);
+
+router.post('/accept-invite/:token', organizationController.acceptInvite);
+
 router.post('/', authMiddleware, organizationController.createOrganization);
 router.post('/:organizationId/projects',authMiddleware,  roleMiddleware('ADMIN'),addProjectToOrganization);
 // Get all organizations (accessible to all authenticated users)

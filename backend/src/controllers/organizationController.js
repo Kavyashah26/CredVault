@@ -118,3 +118,42 @@ exports.getOrgUserProjects = async (req, res) => {
     });
   }
 };
+
+
+exports.inviteUserToOrganization=async(req,res)=>{
+  const { orgId } = req.params; // Extract organization ID from the request params
+  const { emails } = req.body; // Extract emails from the request body (should be an array)
+
+  if (!emails || !Array.isArray(emails)) {
+    return res.status(400).json({ message: "Invalid request. 'emails' must be an array." });
+  }
+
+  try {
+    // Call the service to handle the invite logic
+    const result = await organizationService.inviteToOrganization(orgId, emails);
+    return res.status(200).json({ message: "Invitations sent successfully", data: result });
+  } catch (error) {
+    console.error("Error inviting users:", error);
+    return res.status(500).json({ message: "Failed to send invitations", error: error.message });
+  }
+}
+
+exports.acceptInvite = async (req, res) => {
+  const { token } = req.params;
+
+  try {
+      const response = await organizationService.verifyInviteToken(token);
+
+      if (response.isValid) {
+          // Assuming the user is added to the organization here
+          // await addUserToOrganization(response.userId, response.orgId);
+          
+          res.status(200).json({ message: 'Successfully added to the organization' });
+      } else {
+          res.status(400).json({ message: 'Invalid or expired invite' });
+      }
+  } catch (error) {
+      console.error('Error in acceptInvite:', error);
+      res.status(500).json({ message: 'Failed to accept invite' });
+  }
+};

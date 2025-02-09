@@ -1,6 +1,10 @@
 const logger = require('../utils/logger');
 
 const prisma = require('../utils/prismaClient')
+const golangService = require('../utilities/golangService');
+
+// const {sendInvites}= require('../utils/sendInvites')
+
 
 const createOrganization = async (organizationData, userId) => {
   // Check if the user exists
@@ -326,6 +330,28 @@ const getOrgUserProjects = async (orgId, userId) => {
 
 
 
+const inviteToOrganization = async (orgId, emails) => {
+  try {
+    // Call the Golang service to generate the invite and send the email
+    const response = await golangService.generateInvite(orgId, email);
+    return response;
+} catch (error) {
+    console.error('Error in sendInvite service:', error);
+    throw new Error('Failed to send invite');
+}
+};
+
+const verifyInviteToken = async (token) => {
+  try {
+      // Call the Golang service to verify the invite token
+      const response = await golangService.verifyInviteToken(token);
+      return response;
+  } catch (error) {
+      console.error('Error in verifyInviteToken service:', error);
+      throw new Error('Failed to verify invite token');
+  }
+};
+
 
 
 
@@ -336,5 +362,7 @@ module.exports = {
   getOrganizationById,
   deleteOrganizationMember,
   getOrganizationStats,
-  getOrgUserProjects
+  getOrgUserProjects,
+  inviteToOrganization,
+  verifyInviteToken
 };
