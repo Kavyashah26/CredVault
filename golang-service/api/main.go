@@ -1,9 +1,9 @@
-package main
+package handler
 
 import (
 	"log"
 	"net/http"
-	"os"
+
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -32,19 +32,3 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	router.ServeHTTP(w, r)
 }
 
-// For local development, we still use the main() function
-func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	log.Printf("Server running on port %s", port)
-
-	// Use the same router for local development
-	router := InitializeRouter()
-
-	if err := router.Run(":" + port); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}
-}
