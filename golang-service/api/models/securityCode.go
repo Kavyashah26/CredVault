@@ -22,13 +22,27 @@ func MigrateDB() {
 func StoreCode(email, code string) error {
 	expiration := time.Now().Add(15 * time.Minute) // Code expires in 15 minutes
 
-	securityCode := SecurityCode{
-		Email:     email,
-		Code:      code,
-		ExpiresAt: expiration,
+	var securityCode SecurityCode
+	result := utils.DB.Where("email = ?", email).First(&securityCode)
+
+	if result.Error == nil {
+		// Record exists, update the code and expiration time
+		securityCode.Code = code
+		securityCode.ExpiresAt = expiration
+		return utils.DB.Save(&securityCode).Error
 	}
 
-	return utils.DB.Create(&securityCode).Error
+	if result.Error != nil && result.Error.Error() == "record not found" {
+		// No existing record, insert a new one
+		newCode := SecurityCode{
+			Email:     email,
+			Code:      code,
+			ExpiresAt: expiration,
+		}
+		return utils.DB.Create(&newCode).Error
+	}
+
+	return result.Error
 }
 
 
