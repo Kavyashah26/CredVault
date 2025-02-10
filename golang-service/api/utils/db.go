@@ -25,3 +25,7 @@ func ConnectDB() {
 
 	fmt.Println("Connected to PostgreSQL successfully!")
 }
+
+func GetDB() *gorm.DB {
+	return DB
+}

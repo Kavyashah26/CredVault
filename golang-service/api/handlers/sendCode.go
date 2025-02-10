@@ -29,9 +29,13 @@ func SendCode(c *gin.Context) {
 	}
 
 	if err := models.StoreCode(req.Email, code); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store security code"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to store security code",
+			"details": err.Error(),
+		})
 		return
 	}
+	
 
 	c.JSON(http.StatusOK, gin.H{"message": "Security code sent!"})
 }
