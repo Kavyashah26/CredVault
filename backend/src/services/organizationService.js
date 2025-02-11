@@ -1,7 +1,7 @@
 const logger = require('../utils/logger');
 
 const prisma = require('../utils/prismaClient')
-const golangService = require('../utilities/golangService');
+// const golangService = require('../utilities/golangService');
 
 // const {sendInvites}= require('../utils/sendInvites')
 

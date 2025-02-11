@@ -98,11 +98,22 @@ const loginUser = async (email, password,fingerprint) => {
   }
 
   const reply=sendSecurityCodeEmail(user.email, fingerprint)
-  return {
-    success: false,
-    message: "New device detected. A security code has been sent to your email.",
-    code:1122
-  };
+  // return {
+  //   success: false,
+  //   message: "New device detected. A security code has been sent to your email.",
+  // };
+  if (reply.success) {
+    return {
+        success: true,
+        message: "New device detected. A security code has been sent to your email.",
+    };
+} else {
+    return {
+        success: false,
+        message: "Failed to send security code. Please try again.",
+        error: reply.error,  // Optional: Include this if you want to debug further
+    };
+}
 } catch (error) {
   console.error(error);
   throw error;
