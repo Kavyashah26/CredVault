@@ -11,7 +11,6 @@ import (
 	"golang-service/api/handlers"
 	"golang-service/api/models"
 	"golang-service/api/utils"
-	"github.com/gin-contrib/cors"
 
 )
 
@@ -19,15 +18,15 @@ func InitializeRouter() *gin.Engine {
 	router := gin.Default()
 
 	// Custom CORS configuration
-	config := cors.Config{
-		AllowOrigins:     []string{"https://cred-vault.vercel.app/", "http://localhost:3000"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}
+	// config := cors.Config{
+	// 	AllowOrigins:     []string{"https://cred-vault.vercel.app/", "http://localhost:3000"},
+	// 	AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	// 	AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+	// 	ExposeHeaders:    []string{"Content-Length"},
+	// 	AllowCredentials: true,
+	// }
 
-	router.Use(cors.New(config))
+	// router.Use(cors.New(config))
 
 	router.POST("/api/send-code", handlers.SendCode)
 	router.POST("/api/verify-code", handlers.VerifyCode)
