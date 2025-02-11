@@ -11,6 +11,8 @@ const sendSecurityCodeEmail = async (email, fingerprint) => {
         });
 
         if (response.status === 200) {
+            console.log("good golang");
+            
             return {
                 success: true,
                 message: "Security code sent successfully.",

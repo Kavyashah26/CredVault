@@ -19,28 +19,49 @@ exports.loginUser = async (req, res) => {
     const { email, password,fingerprint } = req.body;
     // const token = await userService.loginUser(email, password,fingerprint);
 
-    const result = await userService.loginUser(email, password, fingerprint);
+    //redefine these things
 
-    if (result.success) {
-      return res.status(200).json({
-        message: "Login successful",
-        token: result.token,
-      });
-    } else {
-      if(result.code){
-        return res.status(400).json({
-          message: result.message,
-          code:result.code
-        });
+    const result = await userService.loginUser(email, password, fingerprint);
+    // if (result.success && !result.IsCode) {
+    //   return res.status(200).json({
+    //     message: "Login successful",
+    //     token: result.token,
+    //   });
+    // } else {
+    //   if(result.success && result.IsCode){
+    //     return res.status(400).json({
+    //       message: result.message,
+    //     });
+    //   }
+    //   return res.status(400).json({
+    //     message: result.message,
+    //   });
+    // }
+    if(result.success){
+      if(result.IsCode){
+        return res.status(200).json({
+          success: true,
+          IsCode:true,
+          message: "New device detected. A security code has been sent to your email.",
+            });
+      }else{
+        return res.status(200).json({
+              success: true,
+              message: "Login successful",
+              token: result.token,
+            });
       }
+    }else{
       return res.status(400).json({
-        message: result.message,
-      });
+            message: result.message,
+            success: false,
+          });
     }
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       message: "An error occurred during login. Please try again.",
+      success: false,
     });
   }
 };
@@ -143,3 +164,28 @@ exports.getUserProjects = async (req, res) => {
   }
 };
 
+
+exports.verifyCode = async (req, res) => {
+  const { email, code, saveFingerprint, userFingerprint } = req.body;
+
+  if (!email || !code) {
+      return res.status(400).json({ error: "Email and code are required." });
+  }
+
+  try {
+      // Call the service to verify the code
+      const verificationResponse = await userService.verifyCode(email, code,saveFingerprint,userFingerprint);
+
+      if (!verificationResponse.success) {
+          return res.status(400).json({ error: "Verification failed. Invalid code." });
+      }
+
+      
+
+      res.status(200).json({ message: "Code verified successfully!" , success:true,token: verificationResponse.token,});
+
+  } catch (error) {
+      console.error("Error during verification:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+};

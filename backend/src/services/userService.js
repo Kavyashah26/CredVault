@@ -94,10 +94,11 @@ const loginUser = async (email, password,fingerprint) => {
     
     const token = jwt.generateToken(user);
     // return res.status(200).json({ success: true, token });
-    return { success: true, token };
+    return { success: true, token,
+      IsCode:false,};
   }
 
-  const reply=sendSecurityCodeEmail(user.email, fingerprint)
+  const reply=await sendSecurityCodeEmail(user.email, fingerprint)
   // return {
   //   success: false,
   //   message: "New device detected. A security code has been sent to your email.",
@@ -105,6 +106,7 @@ const loginUser = async (email, password,fingerprint) => {
   if (reply.success) {
     return {
         success: true,
+        IsCode:true,
         message: "New device detected. A security code has been sent to your email.",
     };
 } else {
@@ -343,6 +345,51 @@ const getOrgUserProjects = async (orgId, userId) => {
   });
 };
 
+const verifyCodeCaller = require('../utils/verifyCode');
+
+const verifyCode = async (email, code,saveFingerprint,fingerprint) => {
+    try {
+        const response = await verifyCodeCaller.callGoLangService(email, code);
+        // If the user wants to save fingerprint, update the database
+      if (response.success){
+        const token = jwt.generateToken(user);
+
+        if(saveFingerprint && fingerprint) {
+          const user = await prisma.user.findUnique({
+            where: { email }
+          });
+          
+          if (!user) {
+            return res.status(404).json({ error: "User not found." });
+          }
+          
+          createdResponse=await prisma.userFingerprint.create({
+            data: {
+              userId: user.id,
+              fingerprint,
+                // Save the user's browser fingerprint
+            },
+          });
+        }
+        // if(createdResponse){
+          
+          return {
+            success: true,
+            response,
+            token
+          };
+        // }
+        // return {
+        //   success: true,
+        //   response
+        // };
+      }
+
+    } catch (error) {
+        console.error("Error in verifyService:", error);
+        return { success: false };
+    }
+};
 
 
 
@@ -356,4 +403,5 @@ module.exports = {
   updateUserRole,
   getLoggedInUserDetails,
   getUserProjects,
+  verifyCode
 };

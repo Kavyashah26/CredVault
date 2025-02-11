@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Menu, X, User, LogOut, Settings,Lock } from 'lucide-react'
-
+import { deleteCookie } from 'cookies-next' 
 export function LoggedInNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const router = useRouter()
@@ -60,7 +60,10 @@ export function LoggedInNavbar() {
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => router.push('/login')}>
+                <DropdownMenuItem onSelect={() =>{ 
+                     deleteCookie('token')                     
+                     router.push('/login');
+                     }}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>

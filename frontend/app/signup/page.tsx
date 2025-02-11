@@ -9,6 +9,13 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Navbar } from '../components/Navbar'
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
+
+const getFingerprint = async () => {
+  const fp = await FingerprintJS.load();
+  const result = await fp.get();
+  return result.visitorId; // This is the unique fingerprint
+};
 
 export default function SignupPage() {
   const [name, setName] = useState('')
@@ -26,9 +33,10 @@ export default function SignupPage() {
       setError('Passwords do not match')
       return
     }
+    const fingerprint = await getFingerprint();
     try {
           // Make the API call to login the user
-          const response = await fetch('https://admin-credvault.vercel.app/api/users/register', {
+          const response = await fetch('http://localhost:5000/api/users/register', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -36,7 +44,8 @@ export default function SignupPage() {
             body: JSON.stringify({
               email: email,
               password: password,
-              name
+              name,
+              fingerprint
             }),
           })
     
@@ -48,7 +57,7 @@ export default function SignupPage() {
           const data = await response.json()
     
     
-          router.push('/dashboard')
+          router.push('/login')
     } catch (err:any) {
       setError(err.message || 'An error occurred. Please try again.')
     }
