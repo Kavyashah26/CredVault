@@ -1255,6 +1255,8 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
       }
       const data = await response.json()
       setOrganization(data)
+      console.log(data);
+      
     } catch (error) {
       console.error("Error fetching organization details:", error)
     }
@@ -1285,6 +1287,8 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
   useEffect(() => {
     fetchOrganizationDetails()
     fetchProjects()
+    console.log(organization);
+    
   }, [fetchOrganizationDetails, fetchProjects]) // Dependencies are now stable
   
 

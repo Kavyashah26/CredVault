@@ -355,7 +355,7 @@ export default function LoginPage() {
     try {
       const userFingerprint = await getFingerprint()
       setFingerprint(userFingerprint)
-      const response = await fetch("https://admin-credvault.vercel.app/api/users/login", {
+      const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -389,7 +389,7 @@ export default function LoginPage() {
     setError("")
 
     try {
-      const response = await fetch("https://admin-credvault.vercel.app/api/users/verify-code", {
+      const response = await fetch("http://localhost:5000/api/users/verify-code", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -408,6 +408,8 @@ export default function LoginPage() {
       }
 
       const data = await response.json()
+      console.log("data",data);
+      
       if (data.success) {
         setCookie("token", data.token, { maxAge: 60 * 60 * 24 * 7, path: "/" })
         router.push("/dashboard")

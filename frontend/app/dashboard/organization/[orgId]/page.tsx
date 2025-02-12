@@ -247,7 +247,7 @@
 //   const headersList = headers()
 //   const role = (await headersList).get("x-org-role") || "MEMBER" // Default to MEMBER if no role is found
 //   console.log("allrole",role);
-//   const { orgId } = params;
+//   const { orgId } = await params;
 //   return <OrganizationPageClient orgId={orgId} role={role} />
 // }
 
@@ -256,28 +256,15 @@ import { headers } from "next/headers";
 import OrganizationPageClient from "./OrganizationPageClient";
 
 interface OrganizationPageProps {
-  params: {
-    orgId: string;
-  };
+  params: { orgId: string };
 }
 
-
-// export default async function OrganizationPage({ params }: { params: { orgId: string } }) {
-//   const headersList = await headers();  // Await here to get the resolved headers
-//   const role = headersList.get("x-org-role") || "MEMBER";  // Now 'get' will work properly
-
-//   console.log("allrole", role);
-
-//   const { orgId } = params;
-//   return <OrganizationPageClient orgId={orgId} role={role} />;
-// }
-
 export default async function OrganizationPage({ params }: OrganizationPageProps) {
-  const headersList = await headers();
-  const role = headersList.get("x-org-role") || "MEMBER";
-
+  const headersList = headers();
+  const role = (await headersList).get("x-org-role") || "MEMBER";  // Removed await here since headers() is synchronous in some cases
+  
   console.log("allrole", role);
-
-  const { orgId } = params;
+  
+  const { orgId } = params;  // No await here
   return <OrganizationPageClient orgId={orgId} role={role} />;
 }
