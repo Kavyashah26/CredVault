@@ -137,7 +137,7 @@
 //           .find((row) => row.startsWith('token='))
 //           ?.split('=')[1]
 
-//         const response = await fetch(`http://localhost:5000/api/organizations/${orgId}/user`, {
+//         const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/user`, {
 //           headers: {
 //             Authorization: `Bearer ${token}`,
 //           },
@@ -252,19 +252,89 @@
 // }
 
 
-import { headers } from "next/headers";
-import OrganizationPageClient from "./OrganizationPageClient";
+// import { headers } from "next/headers";
+// import OrganizationPageClient from "./OrganizationPageClient";
 
-interface OrganizationPageProps {
-  params: { orgId: string };
+// interface OrganizationPageProps {
+//   params: { orgId: string };
+// }
+
+// export default async function OrganizationPage({ params }: OrganizationPageProps) {
+//   const headersList = headers();
+//   const role = (await headersList).get("x-org-role") || "MEMBER";  // Removed await here since headers() is synchronous in some cases
+  
+//   console.log("allrole", role);
+  
+//   const { orgId } = params;  // No await here
+//   return <OrganizationPageClient orgId={orgId} role={role} />;
+// }
+
+// import { headers } from "next/headers"
+// import OrganizationPageClient from "./OrganizationPageClient"
+
+// interface PageProps {
+//   params: {
+//     orgId: string
+//   }
+//   searchParams: { [key: string]: string | string[] | undefined }
+// }
+
+// export default async function OrganizationPage({ params }: PageProps) {
+//   const headersList = headers()
+//   const role = (await headersList).get("x-org-role") || "MEMBER"
+
+//   console.log("allrole", role)
+
+//   const { orgId } = params
+//   return <OrganizationPageClient orgId={orgId} role={role} />
+// }
+
+
+// import { headers } from "next/headers"
+// import OrganizationPageClient from "./OrganizationPageClient"
+
+// export default async function OrganizationPage({
+//   params,
+//   searchParams,
+// }: {
+//   params: { orgId: string }
+//   searchParams?: { [key: string]: string | string[] | undefined }
+// }) {
+//   const headersList = headers()
+//   const role = (await headersList).get("x-org-role") || "MEMBER"
+
+//   console.log("allrole", role)
+
+//   const { orgId } = params
+//   return <OrganizationPageClient orgId={orgId} role={role} />
+// }
+
+
+import { headers } from "next/headers"
+import { Suspense } from "react"
+import OrganizationPageClient from "./OrganizationPageClient"
+
+type PageParams = {
+  orgId: string
 }
 
-export default async function OrganizationPage({ params }: OrganizationPageProps) {
-  const headersList = headers();
-  const role = (await headersList).get("x-org-role") || "MEMBER";  // Removed await here since headers() is synchronous in some cases
-  
-  console.log("allrole", role);
-  
-  const { orgId } = params;  // No await here
-  return <OrganizationPageClient orgId={orgId} role={role} />;
+async function getOrgRole() {
+  const headersList = headers()
+  return (await headersList).get("x-org-role") || "MEMBER"
+}
+
+export default async function OrganizationPage({
+  params,
+}: {
+  params: Promise<PageParams>
+}) {
+  const role = await getOrgRole()
+  const resolvedParams = await params
+  const orgId = resolvedParams.orgId
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <OrganizationPageClient orgId={orgId} role={role} />
+    </Suspense>
+  )
 }

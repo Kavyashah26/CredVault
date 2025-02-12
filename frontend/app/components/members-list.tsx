@@ -94,7 +94,7 @@ export function MembersList({ members, orgId, onMemberRemoved,isAdmin }: Members
         ?.split("=")[1]
 
       const response = await fetch(
-        `http://localhost:5000/api/organizations/${orgId}/members/${memberToRemove.userId}`,
+        `https://admin-credvault.vercel.app/api/organizations/${orgId}/members/${memberToRemove.userId}`,
         {
           method: "DELETE",
           headers: {

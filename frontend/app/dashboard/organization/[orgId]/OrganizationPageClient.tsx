@@ -41,7 +41,7 @@
 // // // // //           .split("; ")
 // // // // //           .find((row) => row.startsWith("token="))
 // // // // //           ?.split("=")[1]
-// // // // //         const response = await fetch(`http://localhost:5000/api/organizations/${orgId}`, {
+// // // // //         const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}`, {
 // // // // //           headers: {
 // // // // //             Authorization: `Bearer ${token}`,
 // // // // //           },
@@ -62,7 +62,7 @@
 // // // // //           .split("; ")
 // // // // //           .find((row) => row.startsWith("token="))
 // // // // //           ?.split("=")[1]
-// // // // //         const response = await fetch(`http://localhost:5000/api/organizations/${orgId}/user`, {
+// // // // //         const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/user`, {
 // // // // //           headers: {
 // // // // //             Authorization: `Bearer ${token}`,
 // // // // //           },
@@ -230,13 +230,13 @@
 // // // //           let response
 // // // //           if(canCreateProject){
 
-// // // //               response = await fetch(`http://localhost:5000/api/organizations/${orgId}/stats`, {
+// // // //               response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/stats`, {
 // // // //                   headers: {
 // // // //                       Authorization: `Bearer ${token}`,
 // // // //                     },
 // // // //                 })
 // // // //             }else{
-// // // //                 response = await fetch(`http://localhost:5000/api/organizations/${orgId}/`, {
+// // // //                 response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/`, {
 // // // //                     headers: {
 // // // //                         Authorization: `Bearer ${token}`,
 // // // //                       },
@@ -260,7 +260,7 @@
 // // // //           .split("; ")
 // // // //           .find((row) => row.startsWith("token="))
 // // // //           ?.split("=")[1]
-// // // //         const response = await fetch(`http://localhost:5000/api/organizations/${orgId}/user`, {
+// // // //         const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/user`, {
 // // // //           headers: {
 // // // //             Authorization: `Bearer ${token}`,
 // // // //           },
@@ -500,13 +500,13 @@
 // // //           ?.split("=")[1]
 // // //         let response
 // // //         if (canCreateProject) {
-// // //           response = await fetch(`http://localhost:5000/api/organizations/${orgId}/stats`, {
+// // //           response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/stats`, {
 // // //             headers: {
 // // //               Authorization: `Bearer ${token}`,
 // // //             },
 // // //           })
 // // //         } else {
-// // //           response = await fetch(`http://localhost:5000/api/organizations/${orgId}/`, {
+// // //           response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/`, {
 // // //             headers: {
 // // //               Authorization: `Bearer ${token}`,
 // // //             },
@@ -530,7 +530,7 @@
 // // //           .split("; ")
 // // //           .find((row) => row.startsWith("token="))
 // // //           ?.split("=")[1]
-// // //         const response = await fetch(`http://localhost:5000/api/organizations/${orgId}/user`, {
+// // //         const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/user`, {
 // // //           headers: {
 // // //             Authorization: `Bearer ${token}`,
 // // //           },
@@ -749,7 +749,7 @@
 // //           .split("; ")
 // //           .find((row) => row.startsWith("token="))
 // //           ?.split("=")[1]
-// //         const response = await fetch(`http://localhost:5000/api/organizations/${orgId}`, {
+// //         const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}`, {
 // //           headers: {
 // //             Authorization: `Bearer ${token}`,
 // //           },
@@ -770,7 +770,7 @@
 // //           .split("; ")
 // //           .find((row) => row.startsWith("token="))
 // //           ?.split("=")[1]
-// //         const response = await fetch(`http://localhost:5000/api/organizations/${orgId}/user`, {
+// //         const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/user`, {
 // //           headers: {
 // //             Authorization: `Bearer ${token}`,
 // //           },
@@ -988,7 +988,7 @@
 //           .split("; ")
 //           .find((row) => row.startsWith("token="))
 //           ?.split("=")[1]
-//         const response = await fetch(`http://localhost:5000/api/organizations/${orgId}`, {
+//         const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}`, {
 //           headers: {
 //             Authorization: `Bearer ${token}`,
 //           },
@@ -1011,7 +1011,7 @@
 //           .split("; ")
 //           .find((row) => row.startsWith("token="))
 //           ?.split("=")[1]
-//         const response = await fetch(`http://localhost:5000/api/organizations/${orgId}/user`, {
+//         const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/user`, {
 //           headers: {
 //             Authorization: `Bearer ${token}`,
 //           },
@@ -1245,7 +1245,7 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
         .split("; ")
         .find((row) => row.startsWith("token="))
         ?.split("=")[1]
-      const response = await fetch(`http://localhost:5000/api/organizations/${orgId}`, {
+      const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -1268,7 +1268,7 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
         .split("; ")
         .find((row) => row.startsWith("token="))
         ?.split("=")[1]
-      const response = await fetch(`http://localhost:5000/api/organizations/${orgId}/user`, {
+      const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

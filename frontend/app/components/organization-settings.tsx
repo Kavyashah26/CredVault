@@ -29,7 +29,7 @@ export function OrganizationSettings({ orgId, initialName, initialDescription }:
         .find((row) => row.startsWith("token="))
         ?.split("=")[1]
 
-      const response = await fetch(`http://localhost:5000/api/organizations/${orgId}`, {
+      const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

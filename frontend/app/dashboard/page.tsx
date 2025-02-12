@@ -46,7 +46,7 @@
 //       try {
 //         const token=document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
 
-//         const response = await fetch('http://localhost:5000/api/users/me', {
+//         const response = await fetch('https://admin-credvault.vercel.app/api/users/me', {
 //           method: 'GET',
 //           headers: {
 //             'Authorization': `Bearer ${token}`,
@@ -214,7 +214,7 @@ export default function DashboardPage() {
           .find((row) => row.startsWith("token="))
           ?.split("=")[1]
 
-        const response = await fetch("http://localhost:5000/api/users/me", {
+        const response = await fetch("https://admin-credvault.vercel.app/api/users/me", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
