@@ -121,17 +121,22 @@ exports.getOrgUserProjects = async (req, res) => {
 
 
 exports.inviteUserToOrganization=async(req,res)=>{
-  const { orgId } = req.params; // Extract organization ID from the request params
-  const { emails } = req.body; // Extract emails from the request body (should be an array)
-
+  const organizationId = req.params.organizationId; // Extract organization ID from the request params
+  const { emails,message } = req.body; // Extract emails from the request body (should be an array)
+  console.log("My OrgId", organizationId);
+  
   if (!emails || !Array.isArray(emails)) {
     return res.status(400).json({ message: "Invalid request. 'emails' must be an array." });
   }
 
   try {
     // Call the service to handle the invite logic
-    const result = await organizationService.inviteToOrganization(orgId, emails);
-    return res.status(200).json({ message: "Invitations sent successfully", data: result });
+    const result = await organizationService.inviteToOrganization(organizationId, emails,message);
+    if(result.success){
+      return res.status(200).json({ result });
+    }else{
+      return res.status(500).json({ message: "Failed to send invitations", error: "Tjere was some internal issue" });
+    }
   } catch (error) {
     console.error("Error inviting users:", error);
     return res.status(500).json({ message: "Failed to send invitations", error: error.message });
@@ -144,9 +149,10 @@ exports.acceptInvite = async (req, res) => {
   try {
       const response = await organizationService.verifyInviteToken(token);
 
-      if (response.isValid) {
+      if (response.success) {
           // Assuming the user is added to the organization here
           // await addUserToOrganization(response.userId, response.orgId);
+          // organizationService.addUserToOrganization(organizationId, userId, req.user.userId);
           
           res.status(200).json({ message: 'Successfully added to the organization' });
       } else {

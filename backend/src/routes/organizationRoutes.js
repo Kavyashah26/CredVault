@@ -13,7 +13,7 @@ router.post('/:organizationId/add-member', authMiddleware, roleMiddleware('ADMIN
 
 router.post('/:organizationId/invite', authMiddleware, roleMiddleware('ADMIN'), organizationController.inviteUserToOrganization);
 
-router.post('/accept-invite/:token', organizationController.acceptInvite);
+router.get('/accept-invite/:token', organizationController.acceptInvite);
 
 router.post('/', authMiddleware, organizationController.createOrganization);
 router.post('/:organizationId/projects',authMiddleware,  roleMiddleware('ADMIN'),addProjectToOrganization);

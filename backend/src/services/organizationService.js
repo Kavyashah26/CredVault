@@ -1,7 +1,7 @@
 const logger = require('../utils/logger');
 
 const prisma = require('../utils/prismaClient')
-// const golangService = require('../utilities/golangService');
+const golangService= require('../utils/golangService');
 
 // const {sendInvites}= require('../utils/sendInvites')
 
@@ -330,22 +330,87 @@ const getOrgUserProjects = async (orgId, userId) => {
 
 
 
-const inviteToOrganization = async (orgId, emails) => {
+// const inviteToOrganization = async (orgId, emails,message) => {
+
+  
+//   try {
+//     // Call the Golang service to generate the invite and send the email
+//     const response = await golangService.generateInvite(orgId, emails,members);
+//     return response;
+// } catch (error) {
+//     console.error('Error in sendInvite service:', error);
+//     throw new Error('Failed to send invite');
+// }
+// };
+
+
+const inviteToOrganization = async (orgId, emails, message) => {
   try {
-    // Call the Golang service to generate the invite and send the email
-    const response = await golangService.generateInvite(orgId, email);
-    return response;
-} catch (error) {
-    console.error('Error in sendInvite service:', error);
-    throw new Error('Failed to send invite');
-}
+    if (!Array.isArray(emails) || emails.length === 0) {
+      throw new Error("Emails should be a non-empty array");
+    }
+
+    // Call the Golang service for each email asynchronously
+    // const invitePromises = emails.map(email => 
+      const response =await golangService.generateInvite(orgId, emails, message)
+      if (response.success == true) {
+        return {
+          success: true,
+          message: "Invites sent successfully",
+          data: response.data, // Returning actual data from the Golang service
+        };
+      } else {
+        console.error("Unexpected response from Golang service:", response);
+        return {
+          success: false,
+          message: "Invalid response from invite service",
+        };
+      }
+      
+    // );
+
+    // Wait for all invitations to be sent
+    // const responses = await Promise.allSettled(invitePromises);
+
+    // Process results
+    // const successfulInvites = responses
+    //   .filter(res => res.status === "fulfilled")
+    //   .map(res => res.value);
+
+    // const failedInvites = responses
+    //   .filter(res => res.status === "rejected")
+    //   .map(res => ({ error: res.reason }));
+
+
+
+  } catch (error) {
+    console.error("Error in inviteToOrganization service:", error);
+    return {
+      success: false,
+      message: "Failed to send invites",
+      error: error.message,
+    };
+  }
 };
 
 const verifyInviteToken = async (token) => {
   try {
       // Call the Golang service to verify the invite token
       const response = await golangService.verifyInviteToken(token);
-      return response;
+      // return response;
+      if (response.success == true) {
+        return {
+          success: true,
+          message: "verified",
+          data: response.data, // Returning actual data from the Golang service
+        };
+      } else {
+        console.error("Unexpected response from Golang service:", response);
+        return {
+          success: false,
+          message: "Invalid response from invite service",
+        };
+      }
   } catch (error) {
       console.error('Error in verifyInviteToken service:', error);
       throw new Error('Failed to verify invite token');
