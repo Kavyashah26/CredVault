@@ -15,7 +15,7 @@ type SecurityCode struct {
 
 
 func MigrateDB() {
-	utils.DB.AutoMigrate(&SecurityCode{})
+	utils.DB.AutoMigrate(&SecurityCode{},&Invite{})
 }
 
 

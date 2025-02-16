@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"net/smtp"
 	"os"
@@ -26,4 +27,53 @@ func SendEmail(recipient, code string) error {
 	msg := []byte("Subject: " + subject + "\r\n\r\n" + body)
 
 	return smtp.SendMail(smtpHost+":"+smtpPort, auth, sender, []string{recipient}, msg)
+}
+
+// func SendInviteEmail(email, token string) {
+// 	// SMTP settings
+// 	sender := os.Getenv("EMAIL_USER")
+// 	password := os.Getenv("EMAIL_PASS")
+// 	to := email
+// 	smtpHost := "smtp.gmail.com"
+// 	smtpPort := "587"
+
+// 	// Email body
+// 	body := fmt.Sprintf("Click the link to accept the invite: https://your-app.com/invite/%s", token)
+
+// 	// Set up authentication
+// 	auth := smtp.PlainAuth("", sender, password, smtpHost)
+
+// 	// Send email
+// 	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, sender, []string{to}, []byte(body))
+// 	if err != nil {
+// 		log.Printf("Failed to send email to %s: %v", email, err)
+// 	}
+// }
+
+func SendInviteEmail(email, token,Customemessage string) {
+	// SMTP settings
+	sender := os.Getenv("EMAIL_USER")
+	password := os.Getenv("EMAIL_PASS")
+	to := email
+	smtpHost := "smtp.gmail.com"
+	smtpPort := "587"
+
+	// Email headers and body
+	subject := "Subject: Invitation to Join Organization\n"
+	contentType := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
+	body := fmt.Sprintf("%s\n\nClick the link to accept the invite: http://localhost:5000/accept-invite/%s", Customemessage,token)
+	
+	// Combine headers and body
+	message := []byte(subject + contentType + "\n" + body)
+
+	// Set up authentication
+	auth := smtp.PlainAuth("", sender, password, smtpHost)
+
+	// Send email
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, sender, []string{to}, message)
+	if err != nil {
+		log.Printf("Failed to send email to %s: %v", email, err)
+	} else {
+		log.Printf("Invite email sent successfully to %s", email)
+	}
 }

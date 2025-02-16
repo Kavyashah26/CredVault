@@ -30,6 +30,8 @@ func InitializeRouter() *gin.Engine {
 	router.POST("/api/send-code", handlers.SendCode)
 	router.POST("/api/verify-code", handlers.VerifyCode)
 	router.GET("/api/health", handlers.HealthCheck)
+	router.POST("/api/invites/send", handlers.SendInviteHandler)
+	router.POST("/api/invites/accept", handlers.AcceptInviteHandler)
 
 	return router
 }
@@ -46,3 +48,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	router.ServeHTTP(w, r)
 }
 
+// func main() {
+// 	// Load environment variables
+// 	if err := godotenv.Load(); err != nil {
+// 		log.Println("Error loading .env file, using system environment variables")
+// 	}
+
+// 	// Connect to the database
+// 	utils.ConnectDB()
+
+// 	// Run migrations
+// 	models.MigrateDB()
+
+// 	// Start Gin server
+// 	r := InitializeRouter()
+// 	log.Println("Server running on port 8080")
+// 	r.Run(":8080")
+// }
