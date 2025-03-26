@@ -14,57 +14,73 @@ exports.registerUser = async (req, res) => {
 
 // Login a user
 
+// exports.loginUser = async (req, res) => {
+//   try {
+//     const { email, password,fingerprint } = req.body;
+//     // const token = await userService.loginUser(email, password,fingerprint);
+
+//     //redefine these things
+
+//     const result = await userService.loginUser(email, password, fingerprint);
+//     // if (result.success && !result.IsCode) {
+//     //   return res.status(200).json({
+//     //     message: "Login successful",
+//     //     token: result.token,
+//     //   });
+//     // } else {
+//     //   if(result.success && result.IsCode){
+//     //     return res.status(400).json({
+//     //       message: result.message,
+//     //     });
+//     //   }
+//     //   return res.status(400).json({
+//     //     message: result.message,
+//     //   });
+//     // }
+//     if(result.success){
+//       if(result.IsCode){
+//         return res.status(200).json({
+//           success: true,
+//           IsCode:true,
+//           message: "New device detected. A security code has been sent to your email.",
+//             });
+//       }else{
+//         return res.status(200).json({
+//               success: true,
+//               message: "Login successful",
+//               token: result.token,
+//             });
+//       }
+//     }else{
+//       return res.status(400).json({
+//             message: result.message,
+//             success: false,
+//           });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       message: "An error occurred during login. Please try again.",
+//       success: false,
+//     });
+//   }
+// };
 exports.loginUser = async (req, res) => {
   try {
-    const { email, password,fingerprint } = req.body;
-    // const token = await userService.loginUser(email, password,fingerprint);
-
-    //redefine these things
-
+    const { email, password, fingerprint } = req.body;
     const result = await userService.loginUser(email, password, fingerprint);
-    // if (result.success && !result.IsCode) {
-    //   return res.status(200).json({
-    //     message: "Login successful",
-    //     token: result.token,
-    //   });
-    // } else {
-    //   if(result.success && result.IsCode){
-    //     return res.status(400).json({
-    //       message: result.message,
-    //     });
-    //   }
-    //   return res.status(400).json({
-    //     message: result.message,
-    //   });
-    // }
-    if(result.success){
-      if(result.IsCode){
-        return res.status(200).json({
-          success: true,
-          IsCode:true,
-          message: "New device detected. A security code has been sent to your email.",
-            });
-      }else{
-        return res.status(200).json({
-              success: true,
-              message: "Login successful",
-              token: result.token,
-            });
-      }
-    }else{
-      return res.status(400).json({
-            message: result.message,
-            success: false,
-          });
+
+    if (result.success) {
+      return res.status(200).json(result);
+    } else {
+      return res.status(400).json(result);
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "An error occurred during login. Please try again.",
-      success: false,
-    });
+    console.error("Login API Error:", error);
+    return res.status(500).json({ message: "An error occurred. Please try again.", success: false });
   }
 };
+
 
 
 // Get all users

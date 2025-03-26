@@ -58,75 +58,113 @@ const registerUser = async (userData) => {
 //   return token;
 // };
 
-const loginUser = async (email, password,fingerprint) => {
+// const loginUser = async (email, password,fingerprint) => {
   
-  try{const user = await prisma.user.findUnique({ where: { email } });
+//   try{const user = await prisma.user.findUnique({ where: { email } });
 
-  if (!user) {
-    console.log("User not found");
-    // return res.status(400).json({ success: false, message: "User not found!" });
-    return { success: false, message:"User not found!" };
+//   if (!user) {
+//     console.log("User not found");
+//     // return res.status(400).json({ success: false, message: "User not found!" });
+//     return { success: false, message:"User not found!" };
 
-  }
+//   }
 
-  console.log("Stored hash: ", user.password); // Log stored hash
-  console.log("Plain password: ", password); // Log input password
+//   console.log("Stored hash: ", user.password); // Log stored hash
+//   console.log("Plain password: ", password); // Log input password
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  console.log("Password valid: ", isPasswordValid); // Check the result of bcrypt comparison
+//   const isPasswordValid = await bcrypt.compare(password, user.password);
+//   console.log("Password valid: ", isPasswordValid); // Check the result of bcrypt comparison
 
-  if (!isPasswordValid) {
-    // return res.status(400).json({ success: false, message: "Invalid password!" });
-    // throw new Error("Invalid password");
-    return { success: false, message:"Invalid password" };
-  }
+//   if (!isPasswordValid) {
+//     // return res.status(400).json({ success: false, message: "Invalid password!" });
+//     // throw new Error("Invalid password");
+//     return { success: false, message:"Invalid password" };
+//   }
 
-  const storedFingerprint = await prisma.userFingerprint.findFirst({
-    where: {
-      userId: user.id,
-      fingerprint,
-    },
-  });
+//   const storedFingerprint = await prisma.userFingerprint.findFirst({
+//     where: {
+//       userId: user.id,
+//       fingerprint,
+//     },
+//   });
 
-  if (storedFingerprint) {
-    // Fingerprint is valid, proceed with login and generate token
-    console.log("Yes, found!!");
+//   if (storedFingerprint) {
+//     // Fingerprint is valid, proceed with login and generate token
+//     console.log("Yes, found!!");
     
-    const token = jwt.generateToken(user);
-    // return res.status(200).json({ success: true, token });
-    return { success: true, token,
-      IsCode:false,};
+//     const token = jwt.generateToken(user);
+//     // return res.status(200).json({ success: true, token });
+//     return { success: true, token,
+//       IsCode:false,};
+//   }
+
+//   const reply=await sendSecurityCodeEmail(user.email, fingerprint)
+//   // return {
+//   //   success: false,
+//   //   message: "New device detected. A security code has been sent to your email.",
+//   // };
+//   if (reply.success) {
+//     return {
+//         success: true,
+//         IsCode:true,
+//         message: "New device detected. A security code has been sent to your email.",
+//     };
+// } else {
+//     return {
+//         success: false,
+//         message: "Failed to send security code. Please try again.",
+//         error: reply.error,  // Optional: Include this if you want to debug further
+//     };
+// }
+// } catch (error) {
+//   console.error(error);
+//   throw error;
+// }
+
+//   // Log activity
+//   // await logger.logActivity({
+//   //   userId: user.id,
+//   //   action: 'LOGIN_USER',
+//   //   details: `User with email ${email} logged in`,
+//   // });
+// };
+
+const loginUser = async (email, password, fingerprint) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return { success: false, message: "User not found!" };
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) return { success: false, message: "Invalid password" };
+
+    const storedFingerprint = await prisma.userFingerprint.findFirst({
+      where: { userId: user.id, fingerprint },
+    });
+
+    if (storedFingerprint) {
+      console.log("Fingerprint recognized, generating token...");
+      const token = jwt.generateToken(user);
+      return { success: true, token, IsCode: false };
+    }
+
+    console.log("New device detected, sending security code...");
+
+    // Use a timeout wrapper to prevent long API wait times
+    const sendEmailWithTimeout = new Promise((resolve) => {
+      setTimeout(() => resolve({ success: false, message: "Email service timeout" }), 5000); // 5s timeout
+    });
+
+    const reply = await Promise.race([sendSecurityCodeEmail(user.email, fingerprint), sendEmailWithTimeout]);
+
+    if (reply.success) {
+      return { success: true, IsCode: true, message: "Security code sent to your email." };
+    } else {
+      return { success: false, message: "Failed to send security code. Try again.", error: reply.message };
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    return { success: false, message: "Internal server error" };
   }
-
-  const reply=await sendSecurityCodeEmail(user.email, fingerprint)
-  // return {
-  //   success: false,
-  //   message: "New device detected. A security code has been sent to your email.",
-  // };
-  if (reply.success) {
-    return {
-        success: true,
-        IsCode:true,
-        message: "New device detected. A security code has been sent to your email.",
-    };
-} else {
-    return {
-        success: false,
-        message: "Failed to send security code. Please try again.",
-        error: reply.error,  // Optional: Include this if you want to debug further
-    };
-}
-} catch (error) {
-  console.error(error);
-  throw error;
-}
-
-  // Log activity
-  // await logger.logActivity({
-  //   userId: user.id,
-  //   action: 'LOGIN_USER',
-  //   details: `User with email ${email} logged in`,
-  // });
 };
 
 /**

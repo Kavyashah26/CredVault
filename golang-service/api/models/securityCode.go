@@ -1,8 +1,9 @@
 package models
 
 import (
-	"time"
+	"context"
 	"golang-service/api/utils"
+	"time"
 )
 
 type SecurityCode struct {
@@ -54,4 +55,13 @@ func GetStoredCode(email string) (*SecurityCode, error) {
 
 func DeleteCode(email string) error {
 	return utils.DB.Where("email = ?", email).Delete(&SecurityCode{}).Error
+}
+func GetStoredCodeWithContext(ctx context.Context, email string) (*SecurityCode, error) {
+	var securityCode SecurityCode
+	result := utils.DB.WithContext(ctx).Where("email = ?", email).First(&securityCode)
+	return &securityCode, result.Error
+}
+
+func DeleteCodeWithContext(ctx context.Context, email string) error {
+	return utils.DB.WithContext(ctx).Where("email = ?", email).Delete(&SecurityCode{}).Error
 }

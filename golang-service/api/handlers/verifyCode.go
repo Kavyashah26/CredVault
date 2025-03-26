@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"golang-service/api/models"
 	"log"
 	"net/http"
@@ -52,20 +53,27 @@ func VerifyCode(c *gin.Context) {
 		return
 	}
 
-	// Fetch stored code
-	storedCode, err := models.GetStoredCode(req.Email)
+	// Fetch stored code with a timeout to prevent long DB waits
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	storedCode, err := models.GetStoredCodeWithContext(ctx, req.Email)
 	if err != nil || storedCode.Code != req.Code || time.Now().After(storedCode.ExpiresAt) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired code", "success": "false"})
 		return
 	}
 
-	// Send success response immediately
+	// Respond immediately to the client
 	c.JSON(http.StatusOK, gin.H{"message": "Code verified successfully!", "success": "true"})
 
-	// Delete code asynchronously to avoid blocking response
-	go func() {
-		if err := models.DeleteCode(req.Email); err != nil {
+	// Delete code asynchronously in the background
+	go func(email string) {
+		delCtx, delCancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer delCancel()
+
+		if err := models.DeleteCodeWithContext(delCtx, email); err != nil {
 			log.Println("Failed to delete security code:", err)
 		}
-	}()
+	}(req.Email)
 }
+
