@@ -18,33 +18,54 @@ type Invite struct {
 
 
 // StoreInvite stores or updates an invite
+// func StoreInvite(orgID, email, token string) error {
+// 	expiration := time.Now().Add(48 * time.Hour) // Expires in 48 hours
+
+// 	var invite Invite
+// 	result := utils.DB.Where("email = ?", email).First(&invite)
+
+// 	if result.Error == nil {
+// 		// Invite exists, update token and expiration
+// 		invite.Token = token
+// 		invite.ExpiresAt = expiration
+// 		invite.Status = "Pending"
+// 		return utils.DB.Save(&invite).Error
+// 	}
+
+// 	if result.Error != nil && result.Error.Error() == "record not found" {
+// 		// Create new invite
+// 		newInvite := Invite{
+// 			OrgID:     orgID,
+// 			Email:     email,
+// 			Token:     token,
+// 			Status:    "Pending",
+// 			ExpiresAt: expiration,
+// 		}
+// 		return utils.DB.Create(&newInvite).Error
+// 	}
+
+// 	return result.Error
+// }
+
 func StoreInvite(orgID, email, token string) error {
 	expiration := time.Now().Add(48 * time.Hour) // Expires in 48 hours
 
-	var invite Invite
-	result := utils.DB.Where("email = ?", email).First(&invite)
-
-	if result.Error == nil {
-		// Invite exists, update token and expiration
-		invite.Token = token
-		invite.ExpiresAt = expiration
-		invite.Status = "Pending"
-		return utils.DB.Save(&invite).Error
+	invite := Invite{
+		OrgID:     orgID,
+		Email:     email,
+		Token:     token,
+		Status:    "Pending",
+		ExpiresAt: expiration,
 	}
 
-	if result.Error != nil && result.Error.Error() == "record not found" {
-		// Create new invite
-		newInvite := Invite{
-			OrgID:     orgID,
-			Email:     email,
-			Token:     token,
-			Status:    "Pending",
-			ExpiresAt: expiration,
-		}
-		return utils.DB.Create(&newInvite).Error
-	}
-
-	return result.Error
+	// Use FirstOrCreate with Assign to avoid separate select/update queries
+	return utils.DB.Where("email = ?", email).
+		Assign(map[string]interface{}{
+			"Token":     token,
+			"ExpiresAt": expiration,
+			"Status":    "Pending",
+		}).
+		FirstOrCreate(&invite).Error
 }
 
 // GetInvite retrieves an invite by email
