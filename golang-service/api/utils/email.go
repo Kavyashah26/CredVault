@@ -14,6 +14,21 @@ func GenerateSecurityCode() string {
 	return fmt.Sprintf("%06d", rand.Intn(1000000))
 }
 
+// func SendEmail(recipient, code string) error {
+// 	smtpHost := "smtp.gmail.com"
+// 	smtpPort := "587"
+// 	sender := os.Getenv("EMAIL_USER")
+// 	password := os.Getenv("EMAIL_PASS")
+
+// 	auth := smtp.PlainAuth("", sender, password, smtpHost)
+
+// 	subject := "Your Security Code"
+// 	body := fmt.Sprintf("Here is your security code: %s", code)
+// 	msg := []byte("Subject: " + subject + "\r\n\r\n" + body)
+
+// 	return smtp.SendMail(smtpHost+":"+smtpPort, auth, sender, []string{recipient}, msg)
+// }
+
 func SendEmail(recipient, code string) error {
 	smtpHost := "smtp.gmail.com"
 	smtpPort := "587"
@@ -26,7 +41,18 @@ func SendEmail(recipient, code string) error {
 	body := fmt.Sprintf("Here is your security code: %s", code)
 	msg := []byte("Subject: " + subject + "\r\n\r\n" + body)
 
-	return smtp.SendMail(smtpHost+":"+smtpPort, auth, sender, []string{recipient}, msg)
+	// ✅ Set timeout for SMTP to prevent hanging
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- smtp.SendMail(smtpHost+":"+smtpPort, auth, sender, []string{recipient}, msg)
+	}()
+
+	select {
+	case err := <-errChan:
+		return err
+	case <-time.After(5 * time.Second): // Timeout after 5s
+		return fmt.Errorf("SMTP server took too long to respond")
+	}
 }
 
 // func SendInviteEmail(email, token string) {
