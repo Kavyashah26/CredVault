@@ -87,7 +87,7 @@ func SendInviteEmail(email, token,Customemessage string) {
 	// Email headers and body
 	subject := "Subject: Invitation to Join Organization\n"
 	contentType := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
-	body := fmt.Sprintf("%s\n\nClick the link to accept the invite: http://localhost:5000/accept-invite/%s", Customemessage,token)
+	body := fmt.Sprintf("%s\n\nClick the link to accept the invite: http://localhost:5000/api/organizations/accept-invite/%s", Customemessage,token)
 	
 	// Combine headers and body
 	message := []byte(subject + contentType + "\n" + body)

@@ -95,3 +95,4 @@ func AcceptInvite(token string) error {
 func DeleteExpiredInvites() error {
 	return utils.DB.Where("expires_at < ?", time.Now()).Delete(&Invite{}).Error
 }
+

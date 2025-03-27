@@ -27,15 +27,14 @@ func InitializeRouter() *gin.Engine {
 
 	router.Use(cors.New(config))
 
-	router.POST("/api/send-code", handlers.SendCode)
-	router.POST("/api/verify-code", handlers.VerifyCode)
+	router.POST("/api/send-code", handlers.SendCodeHandler)
+	router.POST("/api/verify-code", handlers.VerifyCodeHandler)
 	router.GET("/api/health", handlers.HealthCheck)
 	router.POST("/api/invites/send", handlers.SendInviteHandler)
 	router.POST("/api/invites/accept", handlers.AcceptInviteHandler)
 
 	return router
 }
-
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	if err := godotenv.Load(); err != nil {
@@ -66,4 +65,36 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 // 	r := InitializeRouter()
 // 	log.Println("Server running on port 8080")
 // 	r.Run(":8080")
+// }
+
+// package main
+
+// import (
+// 	"golang-service/api/handlers"
+// 	"golang-service/api/utils"
+// 	"log"
+
+// 	"github.com/gin-gonic/gin"
+// 	"github.com/joho/godotenv"
+// )
+
+// func main() {
+// 	// Load .env file
+// 	if err := godotenv.Load(); err != nil {
+// 		log.Fatal("Error loading .env file")
+// 	}
+
+// 	// Initialize Redis
+// 	utils.InitRedis()
+// 	defer utils.CloseRedis() // Close Redis on shutdown
+
+// 	r := gin.Default()
+
+// 	// Define routes
+// 	r.GET("/health", handlers.HealthCheck)
+	
+// 	r.POST("/api/invites/send", handlers.SendInviteHandler)
+// 	r.POST("/api/invites/accept", handlers.AcceptInviteHandler)
+	
+// 	r.Run(":8080") // Start server
 // }
