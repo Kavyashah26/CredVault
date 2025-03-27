@@ -9,7 +9,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"golang-service/api/handlers"
-	"golang-service/api/models"
+	// "golang-service/api/models"
 	"golang-service/api/utils"
 )
 
@@ -41,8 +41,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if err := godotenv.Load(); err != nil {
 		log.Println("Error loading .env file, proceeding with system environment variables")
 	}
-	utils.ConnectDB()
-	models.MigrateDB()
+	// utils.ConnectDB()
+	// models.MigrateDB()
+	utils.InitRedis()
+	defer utils.CloseRedis()
 
 	router := InitializeRouter()
 	router.ServeHTTP(w, r)
