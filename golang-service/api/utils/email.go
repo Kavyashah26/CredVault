@@ -76,7 +76,7 @@ func SendEmail(recipient, code string) error {
 // 	}
 // }
 
-func SendInviteEmail(email, token,Customemessage string) {
+func SendInviteEmail(email, token,Customemessage string) error{
 	// SMTP settings
 	sender := os.Getenv("EMAIL_USER")
 	password := os.Getenv("EMAIL_PASS")
@@ -99,7 +99,9 @@ func SendInviteEmail(email, token,Customemessage string) {
 	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, sender, []string{to}, message)
 	if err != nil {
 		log.Printf("Failed to send email to %s: %v", email, err)
+		return err
 	} else {
 		log.Printf("Invite email sent successfully to %s", email)
+		return nil
 	}
 }

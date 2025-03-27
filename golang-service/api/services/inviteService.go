@@ -85,7 +85,16 @@ func SendInvites(orgID string, emails []string, message string) error {
 		}
 
 		// Send email with invite token
-		utils.SendInviteEmail(email, token, message)
+		// utils.SendInviteEmail(email, token, message)
+		go func(email, token string) {
+			err:=utils.SendInviteEmail(email, token, message);
+			if err != nil {
+				log.Printf("Failed to send email to %s: %v", email, err)
+			} else {
+				log.Printf("📩 Invite email sent successfully to %s", email)
+			}
+		}(email, token)
+	
 	}
 	return nil
 }
