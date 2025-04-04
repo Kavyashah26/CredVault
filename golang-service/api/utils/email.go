@@ -49,7 +49,11 @@ func SendEmail(recipient, code string) error {
 
 	select {
 	case err := <-errChan:
-		return err
+		if err != nil {
+			return fmt.Errorf("failed to send email: %w", err)
+		}
+		log.Printf("✅ Email sent successfully to %s", recipient) // Confirmation log
+		return nil
 	case <-time.After(5 * time.Second): // Timeout after 5s
 		return fmt.Errorf("SMTP server took too long to respond")
 	}
