@@ -143,23 +143,56 @@ exports.inviteUserToOrganization=async(req,res)=>{
   }
 }
 
+// exports.acceptInvite = async (req, res) => {
+//   const { token } = req.params;
+
+//   try {
+//       const response = await organizationService.verifyInviteToken(token);
+//       console.log("from golang",response);
+      
+//       if (response.success) {
+//           // Assuming the user is added to the organization here
+//           // await addUserToOrganization(response.userId, response.orgId);
+//           organizationService.addUserToOrganization(response.orgId, response.user);
+          
+//           res.status(200).json({ message: 'Successfully added to the organization' });
+//       } else {
+//           res.status(400).json({ message: 'Invalid or expired invite' });
+//       }
+//   } catch (error) {
+//       console.error('Error in acceptInvite:', error);
+//       res.status(500).json({ message: 'Failed to accept invite' });
+//   }
+// };
+
 exports.acceptInvite = async (req, res) => {
   const { token } = req.params;
 
   try {
-      const response = await organizationService.verifyInviteToken(token);
+    // Verify the invite token using the Golang service
+    const response = await organizationService.verifyInviteToken(token);
+    console.log("Response from Golang:", response);
 
-      if (response.success) {
-          // Assuming the user is added to the organization here
-          // await addUserToOrganization(response.userId, response.orgId);
-          // organizationService.addUserToOrganization(organizationId, userId, req.user.userId);
-          
-          res.status(200).json({ message: 'Successfully added to the organization' });
-      } else {
-          res.status(400).json({ message: 'Invalid or expired invite' });
+    if (response.success) {
+      // Ensure the response contains the email and orgId
+      if (!response.data.user || !response.data.orgId) {
+        return res.status(400).json({ message: "Invalid invite data" });
       }
+
+      // Add user to the organization using the email
+      const addUserResponse = await organizationService.addUserToOrganization(response.data.orgId, response.data.user);
+      console.log("addUserResponse",addUserResponse);
+      
+      if (addUserResponse.success) {
+        return res.status(200).json({ message: "Successfully added to the organization" });
+      } else {
+        return res.status(500).json({ message: "Failed to add user to organization", error: addUserResponse.error });
+      }
+    } else {
+      return res.status(400).json({ message: "Invalid or expired invite" });
+    }
   } catch (error) {
-      console.error('Error in acceptInvite:', error);
-      res.status(500).json({ message: 'Failed to accept invite' });
+    console.error("Error in acceptInvite:", error);
+    return res.status(500).json({ message: "Failed to accept invite", error: error.message });
   }
 };

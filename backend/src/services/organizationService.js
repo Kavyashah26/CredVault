@@ -85,68 +85,140 @@ const getAllOrganizations = async (userId) => {
 
 };
 
-const addUserToOrganization = async (organizationId, userId, actingUserId) => {
-  // Ensure the acting user is allowed to add users (e.g., admin or owner)
-  const actingUser = await prisma.user.findUnique({
-    where: { id: actingUserId },
-  });
+// const addUserToOrganization = async (organizationId, userEmail) => {
+//   // Ensure the acting user is allowed to add users (e.g., admin or owner)
+//   const actingUser = await prisma.user.findUnique({
+//     where: { id: actingUserId },
+//   });
 
-  if (!actingUser) {
-    throw new Error('Acting user not found');
-  }
+//   if (!actingUser) {
+//     throw new Error('Acting user not found');
+//   }
 
-  // Fetch the organization to check if it exists and if the acting user is the owner
-  const organization = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    include: {
-      creator: true, // Include owner relation to check if the acting user is the owner
-    },
-  });
+//   // Fetch the organization to check if it exists and if the acting user is the owner
+//   const organization = await prisma.organization.findUnique({
+//     where: { id: organizationId },
+//     include: {
+//       creator: true, // Include owner relation to check if the acting user is the owner
+//     },
+//   });
 
-  if (!organization) {
-    throw new Error('Organization not found');
-  }
+//   if (!organization) {
+//     throw new Error('Organization not found');
+//   }
   
-  // Ensure the acting user is the owner of the organization
-  if (organization.creator?.id !== actingUserId) {
-    throw new Error('Permission denied: Only the organization owner can add users');
-  }
+//   // Ensure the acting user is the owner of the organization
+//   if (organization.creator?.id !== actingUserId) {
+//     throw new Error('Permission denied: Only the organization owner can add users');
+//   }
 
+//   // Ensure the user to be added exists
+//   const userToAdd = await prisma.user.findUnique({
+//     where: { id: userId },
+//   });
+
+//   if (!userToAdd) {
+//     throw new Error('User to be added not found');
+//   }
+
+//   // Check if the user is already a member of the organization
+//   const existingMembership = await prisma.organizationMember.findFirst({
+//     where: {
+//       organizationId: organizationId,
+//       userId: userId, // Check if user is already a member of the organization
+//     },
+//   });
+
+//   if (existingMembership) {
+//     return { message: 'User is already a member of the organization.' };
+//   }
+
+//   // Add the user to the organization (via the relation table)
+//   const updatedOrganization = await prisma.organization.update({
+//     where: { id: organizationId },
+//     data: {
+//       members: {
+//         create: {
+//           userId: userId,
+//           role: 'MEMBER', // Define the role for the new member
+//         },
+//       },
+//     },
+//   });
+
+//   return updatedOrganization;
+// };
+
+const addUserToOrganization = async (organizationId, userEmail) => {
+
+  try {
   // Ensure the user to be added exists
   const userToAdd = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { email: userEmail },
   });
 
   if (!userToAdd) {
-    throw new Error('User to be added not found');
+    return {
+      success: false,
+      message: "User with provided email not found",
+    };
+  }
+
+  // Check if the organization exists
+  const organization = await prisma.organization.findUnique({
+    where: { id: organizationId },
+  });
+
+  if (!organization) {
+    return {
+      success: false,
+      message: "Organization not found",
+    };
   }
 
   // Check if the user is already a member of the organization
   const existingMembership = await prisma.organizationMember.findFirst({
     where: {
       organizationId: organizationId,
-      userId: userId, // Check if user is already a member of the organization
+      userId: userToAdd.id, // Use the found user's ID
     },
   });
 
   if (existingMembership) {
-    return { message: 'User is already a member of the organization.' };
+    return {
+      success: false,
+      message: "User is already a member of the organization",
+    };
   }
-
-  // Add the user to the organization (via the relation table)
+  console.log("I'm trying to add user");
+  
+  // Add the user to the organization
   const updatedOrganization = await prisma.organization.update({
     where: { id: organizationId },
     data: {
       members: {
         create: {
-          userId: userId,
+          userId: userToAdd.id,
           role: 'MEMBER', // Define the role for the new member
         },
       },
     },
   });
-
-  return updatedOrganization;
+  console.log("I'm done adding user");
+  
+  return {
+    success: true,
+    message: "User successfully added to the organization",
+    data: updatedOrganization,
+  };
+} catch (error) {
+  console.error("Error in addUserToOrganization:", error);
+  return {
+    success: false,
+    message: "Failed to add user to the organization",
+    error: error.message,
+  };
+}
 };
 
 const getOrganizationById = async (organizationId) => {
@@ -402,7 +474,7 @@ const verifyInviteToken = async (token) => {
         return {
           success: true,
           message: "verified",
-          data: response.data, // Returning actual data from the Golang service
+          data: response, // Returning actual data from the Golang service
         };
       } else {
         console.error("Unexpected response from Golang service:", response);

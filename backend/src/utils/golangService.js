@@ -27,7 +27,8 @@ const generateInvite = async (orgId, emails,message) => {
             emails, // Ensuring it's sent as an array
             message
         });
-
+        console.log(response.data);
+        
         return response.data;
     } catch (error) {
         console.error('Error in generateInvite utility:', error.response?.data || error.message);
@@ -41,6 +42,8 @@ const generateInvite = async (orgId, emails,message) => {
 const verifyInviteToken = async (token) => {
     try {
         const response = await axios.post('https://mail-credvault.vercel.app/api/invites/accept', { token });
+        console.log("resposnse in utilks",response);
+        
         return response.data;
     } catch (error) {
         console.error('Error in verifyInviteToken utility:', error);

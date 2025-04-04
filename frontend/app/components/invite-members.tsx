@@ -121,7 +121,7 @@ export function InviteMembers({ orgId }: InviteMembersProps) {
       throw new Error("Authentication token not found")
     }
 
-    const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/invite`, {
+    const response = await fetch(`http://localhost:5000/api/organizations/${orgId}/invite`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

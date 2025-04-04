@@ -18,7 +18,8 @@ const registerUser = async (userData) => {
   const user = await prisma.user.create({
     data: { email, password: hashedPassword,name },
   });
-
+  console.log(user.id);
+  
   await prisma.userFingerprint.create({
     data: {
       userId: user.id,
