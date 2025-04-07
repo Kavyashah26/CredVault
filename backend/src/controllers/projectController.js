@@ -1,17 +1,5 @@
 const projectService = require('../services/projectService');
 
-// Get a project by ID
-// exports.getProjectById = async (req, res) => {
-//   try {
-//     const { projectId } = req.params;
-//     const project = await projectService.getProjectById(projectId);
-//     res.status(200).json(project);
-//   } catch (error) {
-//     console.error(error.message);
-//     res.status(404).json({ error: error.message });
-//   }
-// };  
-
 exports.getProjectById = async (req, res, next) => {
   try {
     const { projectId } = req.params; // Get project ID from route parameters
@@ -90,20 +78,24 @@ exports.deleteProject = async (req, res) => {
 // };
 exports.assignUserToProject = async (req, res) => {
   const { projectId } = req.params;
-  const { userId, role } = req.body;
-  const currentUser = req.user; // Assuming this is set by authentication middleware
-  console.log("useriD", userId);
+  const { userIds } = req.body;
+  const currentUser = req.user;
+  // console.log("useriD", userId);
   
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    return res.status(400).json({ message: "userIds must be a non-empty array." });
+  }
+
   try {
-    const result = await projectService.assignUserToProject({
+    
+    const result = await projectService.assignUsersToProjectBulk({
       projectId,
-      userId,
-      role,
+      users:userIds,
       currentUser,
     });
 
     return res.status(200).json({
-      message: 'Member successfully added to the project.',
+      message: 'Members successfully added to the project.',
       data: result,
     });
   } catch (error) {

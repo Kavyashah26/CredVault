@@ -1,33 +1,8 @@
-// const { PrismaClient } = require('@prisma/client');
-// const prisma = new PrismaClient(); // Correct instantiation
-
-
 const prisma = require('../utils/prismaClient')
 const { encrypt, decrypt } = require('../utils/encryption');
 const logger = require('../utils/logger');
 
 const CREDENTIAL_SECRET = process.env.CREDENTIAL_SECRET;
-
-// const createCredential = async (credentialData, userId) => {
-//   const encryptedValue = encrypt(credentialData.value, CREDENTIAL_SECRET);
-//   const credential = await prisma.credentials.create({
-//     data: {
-//       ...credentialData,
-//       value: encryptedValue,
-//       createdBy: userId,
-//     },
-//   });
-
-//   // Log activity
-//   await logger.logActivity({
-//     userId,
-//     action: 'CREATE_CREDENTIAL',
-//     details: `Created credential ${credentialData.name} in project ${credentialData.projectId}`,
-//     projectId: credentialData.projectId,
-//   });
-
-//   return credential;
-// };
 
 const createCredential = async (credentialData, userId, projectId) => {
   try {
@@ -57,12 +32,19 @@ const createCredential = async (credentialData, userId, projectId) => {
 
     console.log("newTags", newTags);
     
+    const allTags = await prisma.tag.findMany({
+      where: {
+        name: { in: tags }
+      }
+    });
 
     // Combine existing and new tags (get all tag IDs)
-    const allTagIds = [
-      ...existingTags.map(tag => tag.id),
-      ...newTags.data.map(tag => tag.id) // Only add created tags if they exist
-    ];
+    // const allTagIds = [
+    //   ...existingTags.map(tag => tag.id),
+    //   ...newTags.data.map(tag => tag.id) // Only add created tags if they exist
+    // ];
+
+    const allTagIds = allTags.map(tag => tag.id);
 
     // Create the credential and associate tags (both new and existing)
     const encryptedValue = encrypt(value, CREDENTIAL_SECRET);
@@ -135,66 +117,6 @@ const getCredentialById = async (credentialId, projectId) => {
   }
 };
 
-// const getCredentialsByProject = async (projectId) => {
-//   const credentials = await prisma.credentials.findMany({ where: { projectId } });
-//   return credentials.map((cred) => ({
-//     ...cred,
-//     value: decrypt(cred.value, CREDENTIAL_SECRET),
-//   }));
-// };
-
-// const getCredentialsByProject = async (projectId) => {
-//   try {
-//     // Fetch credentials by projectId
-//     const credentials = await prisma.credential.findMany({
-//       where: { projectId }
-//     });
-
-//     console.log("credentials",credentials);
-    
-//     // Map over the credentials to decrypt the 'value' field and return the transformed data
-//     return credentials.map((cred) => ({
-//       ...cred,
-//       value: decrypt(cred.value, CREDENTIAL_SECRET), // Decrypt the value using a decryption function
-//     }));
-//   } catch (error) {
-//     console.error('Error fetching credentials:', error);
-//     throw new Error('Failed to fetch credentials');
-//   }
-// };
-
-// const getCredentialsByProject = async (projectId) => {
-//   try {
-//     // Fetch credentials by projectId and include the creator's name
-//     const credentials = await prisma.credential.findMany({
-//       where: { projectId },
-//       include: {
-//         creator: {
-//           select: {
-//             id: true,
-//             name: true, // Assuming the User model has a 'name' field
-//           },
-//         },
-//       },
-//     });
-
-//     // Map over the credentials to transform the data
-//     return credentials.map((cred) => ({
-//       id: cred.id,
-//       name: cred.name,
-//       type: cred.type,
-//       description: cred.description,
-//       createdBy: {
-//         id: cred.creator.id,
-//         name: cred.creator.name, // Include the creator's name
-//       },
-//     }));
-//   } catch (error) {
-//     console.error('Error fetching credentials:', error);
-//     throw new Error('Failed to fetch credentials');
-//   }
-// };
-
 const getCredentialsByProject = async (projectId) => {
   try {
     // Fetch credentials by projectId and include creator's name and tags
@@ -241,11 +163,10 @@ const getCredentialsByProject = async (projectId) => {
   }
 };
 
-
 const updateCredential = async (id, updateData, userId) => {
   const encryptedValue = updateData.value ? encrypt(updateData.value, CREDENTIAL_SECRET) : undefined;
 
-  const updatedCredential = await prisma.credentials.update({
+  const updatedCredential = await prisma.credential.update({
     where: { id },
     data: {
       ...updateData,
@@ -264,18 +185,97 @@ const updateCredential = async (id, updateData, userId) => {
   return updatedCredential;
 };
 
+// const deleteCredential = async (id, userId) => {
+//   const credential = await prisma.credentials.delete({ where: { id } });
+
+//   // Log activity
+//   // await logger.logActivity({
+//   //   userId,
+//   //   action: 'DELETE_CREDENTIAL',
+//   //   details: `Deleted credential ${id}`,
+//   //   projectId: credential.projectId,
+//   // });
+
+//   return credential;
+// };
+
+// const deleteCredential = async (id, userId) => {
+//   try {
+//     // Fetch credential before deleting to retain projectId
+//     const credential = await prisma.credential.findUnique({ where: { id } });
+
+//     if (!credential) {
+//       throw new Error(`Credential with ID ${id} not found`);
+//     }
+
+//     // Delete the credential
+//     await prisma.credential.delete({ where: { id } });
+
+//     // Log activity
+//     // await logger.logActivity({
+//     //   userId,
+//     //   action: 'DELETE_CREDENTIAL',
+//     //   details: `Deleted credential ${id}`,
+//     //   projectId: credential.projectId,
+//     // });
+
+//     return credential; // Returning the fetched credential for reference
+//   } catch (error) {
+//     console.error(`Error deleting credential: ${error.message}`);
+//     throw error; // Rethrow the error to be handled upstream
+//   }
+// };
 const deleteCredential = async (id, userId) => {
-  const credential = await prisma.credentials.delete({ where: { id } });
+  try {
+    const credential = await prisma.credential.findUnique({ where: { id } });
 
-  // Log activity
-  await logger.logActivity({
-    userId,
-    action: 'DELETE_CREDENTIAL',
-    details: `Deleted credential ${id}`,
-    projectId: credential.projectId,
-  });
+    if (!credential) {
+      throw new Error(`Credential with ID ${id} not found`);
+    }
 
-  return credential;
+    // Remove tag associations first (don't delete tags themselves!)
+    await prisma.credential.update({
+      where: { id },
+      data: {
+        tags: {
+          set: [], // This removes the link only
+        },
+      },
+    });
+
+    // Now delete the credential
+    await prisma.credential.delete({
+      where: { id },
+    });
+
+    return credential;
+  } catch (error) {
+    console.error(`Error deleting credential: ${error.message}`);
+    throw error;
+  }
+};
+
+
+// ------------------- for NPM package
+
+const getCredentialByNameInProject = async (name, projectId) => {
+  try {
+    const credential = await prisma.credential.findFirst({
+      where: {
+        name,
+        projectId,
+      },
+    });
+
+    if (!credential) return null;
+
+    return {
+      value: decrypt(credential.value, CREDENTIAL_SECRET),
+    };
+  } catch (error) {
+    console.error('DB Error in getCredentialByNameInProject:', error.message);
+    throw new Error('Database error while fetching credential');
+  }
 };
 
 module.exports = {
@@ -283,5 +283,7 @@ module.exports = {
   getCredentialsByProject,
   updateCredential,
   deleteCredential,
-  getCredentialById
+  getCredentialById,
+
+  getCredentialByNameInProject
 };

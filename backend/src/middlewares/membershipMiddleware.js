@@ -31,7 +31,6 @@ const checkProjectMembership = async (req, res, next) => {
 const checkOrganizationMembership = async (req, res, next) => {
     const { organizationId } = req.params;
     const userId = req.user?.userId; // Assuming the user ID is available in `req.user` after authentication
-  
     try {
       // Check if the user is a member of the organization
       const membership = await prisma.organizationMember.findFirst({
@@ -40,7 +39,8 @@ const checkOrganizationMembership = async (req, res, next) => {
           userId,
         },
       });
-  
+      console.log("membership" , membership);
+      
       if (!membership) {
         return res.status(403).json({ message: 'Access denied: You are not a member of this organization.' });
       }

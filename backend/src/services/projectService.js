@@ -1,7 +1,4 @@
-// const { PrismaClient } = require('@prisma/client');
 const logger = require('../utils/logger');
-
-// const prisma = new PrismaClient();
 
 const prisma = require('../utils/prismaClient')
 /**
@@ -114,24 +111,6 @@ const updateProject = async (projectId, updateData, userId) => {
   return project;
 };
 
-/**
- * Delete a project
- */
-// const deleteProject = async (projectId, userId) => {
-//   const project = await prisma.project.delete({
-//     where: { id: projectId },
-//   });
-
-//   // Log activity
-//   await logger.logActivity({
-//     userId,
-//     action: 'DELETE_PROJECT',
-//     details: `Deleted project ${projectId}`,
-//   });
-
-//   return project;
-// };
-
 const deleteProject = async (projectId, userId) => {
   return await prisma.$transaction(async (prisma) => {
     await prisma.projectMember.deleteMany({ where: { projectId } });
@@ -149,71 +128,6 @@ const deleteProject = async (projectId, userId) => {
     return project;
   });
 };
-
-
-/**
- * Assign a user to a project
- */
-// const assignUserToProject = async ({ projectId, userId, role }) => {
-//   // await prisma.projectUsers.create({
-//   //   data: { projectId, userId },
-//   // });
-
-//   // // Log activity
-//   // await logger.logActivity({
-//   //   userId,
-//   //   action: 'ASSIGN_USER_TO_PROJECT',
-//   //   details: `Assigned user ${userId} to project ${projectId}`,
-//   // });
-//   // Step 1: Validate that the project exists
-//   const project = await prisma.project.findUnique({
-//     where: { id: projectId },
-//     include: { organization: true },
-//   });
-
-//   if (!project) {
-//     throw new Error('Project not found.');
-//   }
-
-//   // Step 2: Validate that the user is part of the organization
-//   const organizationMembership = await prisma.organizationMember.findUnique({
-//     where: {
-//       organizationId_userId: {
-//         organizationId: project.organizationId,
-//         userId,
-//       },
-//     },
-//   });
-
-//   if (!organizationMembership) {
-//     throw new Error('User is not a member of the organization associated with this project.');
-//   }
-
-//   // Step 3: Check if the user is already a member of the project
-//   const existingProjectMember = await prisma.projectMember.findUnique({
-//     where: {
-//       projectId_userId: {
-//         projectId,
-//         userId,
-//       },
-//     },
-//   });
-
-//   if (existingProjectMember) {
-//     throw new Error('User is already a member of the project.');
-//   }
-
-//   // Step 4: Add the user as a member of the project
-//   const newMember = await prisma.projectMember.create({
-//     data: {
-//       projectId,
-//       userId,
-//       role,
-//     },
-//   });
-
-//   return newMember;
-// };
 
 
 // const assignUserToProject = async ({ projectId, userId, role, currentUser }) => {
@@ -535,6 +449,84 @@ const getProjectStats = async (projectId) => {
   }
 };
 
+const assignUsersToProjectBulk = async ({ projectId, users, currentUser }) => {
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    include: { organization: true },
+  });
+
+  if (!project) {
+    throw new Error('Project not found.');
+  }
+
+  const organizationMembership = await prisma.organizationMember.findUnique({
+    where: {
+      organizationId_userId: {
+        organizationId: project.organizationId,
+        userId: currentUser.userId,
+      },
+    },
+  });
+
+  if (!organizationMembership) {
+    throw new Error('You are not a member of the organization associated with this project.');
+  }
+
+  if (organizationMembership.role !== 'ADMIN') {
+    const currentUserProjectMembership = await prisma.projectMember.findUnique({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId: currentUser.userId,
+        },
+      },
+    });
+
+    if (!currentUserProjectMembership) {
+      throw new Error('You are not a member of this project.');
+    }
+
+    for (const { role } of users) {
+      if (
+        currentUserProjectMembership.role !== 'ADMIN' &&
+        (currentUserProjectMembership.role === 'PROJECT_MANAGER' && role !== 'MEMBER')
+      ) {
+        throw new Error(
+          'You do not have permission to assign this role. Project Managers can only assign the "MEMBER" role.'
+        );
+      }
+    }
+  }
+
+  // Check existing members (batch)
+  const userIds = users.map(u => u.userId);
+  const existingMembers = await prisma.projectMember.findMany({
+    where: {
+      projectId,
+      userId: { in: userIds },
+    },
+  });
+
+  const existingUserIds = new Set(existingMembers.map(m => m.userId));
+  const newMembers = users
+    .filter(({ userId }) => !existingUserIds.has(userId))
+    .map(({ userId, role }) => ({
+      projectId,
+      userId,
+      role,
+    }));
+
+  if (newMembers.length === 0) {
+    throw new Error('All provided users are already members of the project.');
+  }
+
+  await prisma.projectMember.createMany({
+    data: newMembers,
+  });
+
+  return newMembers;
+};
+
 
 module.exports = {
   createProject,
@@ -546,5 +538,6 @@ module.exports = {
   getProjectUsers,
   addProjectToOrganization,
   removeProjectMember,
-  getProjectStats
+  getProjectStats,
+  assignUsersToProjectBulk
 };

@@ -1,4 +1,7 @@
 const credentialService = require('../services/credentialService');
+const { decodeToken } = require('../utils/tokenUtils');
+const prisma = require('../utils/prismaClient')
+
 
 // Create a credential
 // exports.createCredential = async (req, res) => {
@@ -46,6 +49,7 @@ exports.getCredentialsByProject = async (req, res) => {
 exports.getCredentialById = async (req, res) => {
   try {
     const { credentialId, projectId } = req.params; // Extract credentialId and projectId
+    
 
     // Call the service to fetch the credential
     const credential = await credentialService.getCredentialById(credentialId, projectId);
@@ -82,6 +86,55 @@ exports.deleteCredential = async (req, res) => {
     res.status(200).json({ message: 'Credential deleted successfully' });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+// ------------------------ for package
+
+exports.getCredentialByNameFromToken = async (req, res) => {
+  try {
+    const { name } = req.params;
+    const token = req.headers.authorization?.split(' ')[1]; // Expects Bearer tok_xxx
+
+    if (!token) {
+      return res.status(400).json({ error: 'Missing token in Authorization header' });
+    }
+
+    const { projectId, userId } = decodeToken(token);
+
+    // Check if project exists
+    const projectExists = await prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!projectExists) {
+      return res.status(404).json({ error: 'Project does not exist' });
+    }
+
+    // Check if user is a member of the project
+    const isMember = await prisma.projectMember.findFirst({
+      where: {
+        projectId,
+        userId,
+      },
+    });
+
+    if (!isMember) {
+      return res.status(403).json({ error: 'User is not a member of this project' });
+    }
+
+    // Fetch credential by name for that project
+    const credential = await credentialService.getCredentialByNameInProject(name, projectId);
+
+    if (!credential) {
+      return res.status(404).json({ error: 'Credential not found in this project' });
+    }
+
+    res.status(200).json({ credential });
+  } catch (error) {
+    console.error('Error fetching credential by name:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

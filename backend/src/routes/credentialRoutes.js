@@ -15,7 +15,7 @@ router.post('/:projectId', authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MAN
 router.get('/project/:projectId', authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MANAGER']), errorHandler(credentialController.getCredentialsByProject));
 
 router.get(
-    '/:projectId/:credentialId',
+    '/:credentialId/project/:projectId',
     authMiddleware,
     checkProjectMembership,
     credentialController.getCredentialById
@@ -27,9 +27,16 @@ router.get(
 
 
 // Update a credential (Protected route)
-router.put('/:id', authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MANAGER']), errorHandler(credentialController.updateCredential));
+router.put('/:id/project/:projectId', authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MANAGER']), errorHandler(credentialController.updateCredential));
 
 // Delete a credential (Protected route)
-router.delete('/:id', authMiddleware, roleMiddleware('admin', 'project-manager'), errorHandler(credentialController.deleteCredential));
+router.delete('/:id/project/:projectId', authMiddleware, roleMiddleware(['ADMIN', 'PROJECT_MANAGER']), errorHandler(credentialController.deleteCredential));
+
+
+// ------------------- for package
+router.get('/by-name/:name', errorHandler(credentialController.getCredentialByNameFromToken));
+
+
+
 
 module.exports = router;

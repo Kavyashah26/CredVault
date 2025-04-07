@@ -2,7 +2,7 @@ const axios = require('axios');
 
 exports.callGoLangService = async (email, code) => {
     try {
-        const response = await axios.post('https://mail-credvault.vercel.app/api/verify-code', {
+        const response = await axios.post(`${process.env.GOLANG_SERVICE_URL}/api/verify-code`, {
             email,
             code
         });
@@ -13,7 +13,7 @@ exports.callGoLangService = async (email, code) => {
             return { success: false };
         }
     } catch (error) {
-        console.error("Error calling GoLang service:", error.response ? error.response.data : error.message);
+        console.error("Error calling GoLang servicey:", error.response ? error.response.data : error.message);
         return { success: false };
     }
 };

@@ -291,7 +291,8 @@ const roleMiddleware = (requiredRoles) => {
         
 
         // If user is a project manager and requiredRoles includes 'PROJECT_MANAGER'
-        if (projectMemberOrgOwner && requiredRoles.includes('ADMIN')) {
+        if (projectMemberOrgOwner?.role === 'ADMIN' && requiredRoles.includes('ADMIN')) {
+          
           return next(); // User is a project manager, grant access
         }
 
