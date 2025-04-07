@@ -50,8 +50,9 @@ export default function CreateOrganizationPage() {
         title: "Organization created",
         description: "Your new organization has been created successfully.",
       })
-
-      router.push(`/dashboard/organization/${data.id}`)
+      console.log(data);
+      
+      router.push(`/dashboard/organization/${data.organization.id}`)
     } catch (error) {
       console.error("Error creating organization:", error)
       toast({
