@@ -109,8 +109,8 @@ export function MembersList({
 
       // Use different API endpoint based on context (org or project)
       const endpoint = isProjectContext
-        ? `https://admin-credvault.vercel.app/api/projects/${projectId}/users/${memberToRemove.userId}`
-        : `https://admin-credvault.vercel.app/api/organizations/${orgId}/members/${memberToRemove.userId}`
+        ? `${process.env.BACKEND_API_URL}/api/projects/${projectId}/users/${memberToRemove.userId}`
+        : `${process.env.BACKEND_API_URL}/api/organizations/${orgId}/members/${memberToRemove.userId}`
 
       const response = await fetch(endpoint, {
         method: "DELETE",

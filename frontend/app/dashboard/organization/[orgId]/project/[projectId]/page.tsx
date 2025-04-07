@@ -92,7 +92,7 @@ export default function ProjectPage() {
           throw new Error("Authentication token not found. Please log in again.")
         }
 
-        const response = await fetch(`http://localhost:5000/api/credentials/project/${projectId}`, {
+        const response = await fetch(`${process.env.BACKEND_API_URL}/api/credentials/project/${projectId}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -138,7 +138,7 @@ export default function ProjectPage() {
         throw new Error("Authentication token not found. Please log in again.")
       }
 
-      const response = await fetch(`http://localhost:5000/api/credentials/${credentialId}/project/${projectId}`, {
+      const response = await fetch(`${process.env.BACKEND_API_URL}/api/credentials/${credentialId}/project/${projectId}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -191,7 +191,7 @@ export default function ProjectPage() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/credentials/${selectedCredential.id}/project/${projectId}`,
+        `${process.env.BACKEND_API_URL}/api/credentials/${selectedCredential.id}/project/${projectId}`,
         {
           method: "DELETE",
           headers: {
@@ -234,7 +234,7 @@ export default function ProjectPage() {
         throw new Error("Authentication token not found")
       }
 
-      const response = await fetch(`http://localhost:5000/api/credentials/project/${projectId}`, {
+      const response = await fetch(`${process.env.BACKEND_API_URL}/api/credentials/project/${projectId}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

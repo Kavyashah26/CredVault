@@ -149,7 +149,7 @@ export default function NewProjectPage() {
         },
       }
 
-      const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgID}/projects`, {
+      const response = await fetch(`${process.env.BACKEND_API_URL}/api/organizations/${orgID}/projects`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

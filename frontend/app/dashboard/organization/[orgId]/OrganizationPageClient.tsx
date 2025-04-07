@@ -63,7 +63,7 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
         .find((row) => row.startsWith("token="))
         ?.split("=")[1]
       // const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}`, {
-      const response = await fetch(`http://localhost:5000/api/organizations/${orgId}`, {
+      const response = await fetch(`${process.env.BACKEND_API_URL}/api/organizations/${orgId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -86,7 +86,7 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
         .split("; ")
         .find((row) => row.startsWith("token="))
         ?.split("=")[1]
-      const response = await fetch(`https://admin-credvault.vercel.app/api/organizations/${orgId}/user`, {
+      const response = await fetch(`${process.env.BACKEND_API_URL}/api/organizations/${orgId}/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

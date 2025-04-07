@@ -95,7 +95,7 @@ export default function AddCredentialModal({
         throw new Error("Authentication token not found. Please log in again.")
       }
 
-      const response = await fetch(`http://localhost:5000/api/credentials/${projectId}`, {
+      const response = await fetch(`${process.env.BACKEND_API_URL}/api/credentials/${projectId}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

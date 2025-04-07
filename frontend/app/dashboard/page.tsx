@@ -214,7 +214,7 @@ export default function DashboardPage() {
           .find((row) => row.startsWith("token="))
           ?.split("=")[1]
 
-        const response = await fetch("https://admin-credvault.vercel.app/api/users/me", {
+        const response = await fetch(`${process.env.BACKEND_API_URL}/api/users/me`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
