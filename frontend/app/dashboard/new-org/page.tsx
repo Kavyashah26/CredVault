@@ -30,7 +30,7 @@ export default function CreateOrganizationPage() {
         throw new Error("Authentication token not found")
       }
 
-      const response = await fetch(`${process.env.BACKEND_API_URL}/api/organizations`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/organizations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

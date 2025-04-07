@@ -36,7 +36,7 @@ export default function SignupPage() {
     const fingerprint = await getFingerprint();
     try {
           // Make the API call to login the user
-          const response = await fetch(`${process.env.BACKEND_API_URL}/api/users/register`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/users/register`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

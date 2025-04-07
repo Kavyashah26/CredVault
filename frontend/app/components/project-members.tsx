@@ -45,7 +45,7 @@ export default function ProjectMembers({ projectId, orgId, isAdmin }: ProjectMem
         .find((row) => row.startsWith("token="))
         ?.split("=")[1]
 
-      const response = await fetch(`${process.env.BACKEND_API_URL}/api/projects/${projectId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/projects/${projectId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -80,7 +80,7 @@ export default function ProjectMembers({ projectId, orgId, isAdmin }: ProjectMem
         .find((row) => row.startsWith("token="))
         ?.split("=")[1]
 
-      const response = await fetch(`${process.env.BACKEND_API_URL}/api/organizations/${orgId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/organizations/${orgId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -114,7 +114,7 @@ export default function ProjectMembers({ projectId, orgId, isAdmin }: ProjectMem
         ?.split("=")[1]
 
       // const response = await fetch(`https://admin-credvault.vercel.app/api/projects/${projectId}/assign`, {
-      const response = await fetch(`${process.env.BACKEND_API_URL}/api/projects/${projectId}/assign`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/projects/${projectId}/assign`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -84,7 +84,7 @@ const UpdateCredentialModal: React.FC<UpdateCredentialModalProps> = ({
         throw new Error("Authentication token not found")
       }
 
-      const response = await fetch(`${process.env.BACKEND_API_URL}/api/credentials/${credential.id}/project/${projectId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/credentials/${credential.id}/project/${projectId}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,

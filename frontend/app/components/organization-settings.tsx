@@ -29,7 +29,7 @@ export function OrganizationSettings({ orgId, initialName, initialDescription }:
         .find((row) => row.startsWith("token="))
         ?.split("=")[1]
 
-      const response = await fetch(`${process.env.BACKEND_API_URL}/api/organizations/${orgId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/organizations/${orgId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

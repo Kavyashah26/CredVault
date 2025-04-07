@@ -41,7 +41,7 @@ export default function LoginPage() {
     try {
       const userFingerprint = await getFingerprint()
       setFingerprint(userFingerprint)
-      const response = await fetch(`${process.env.BACKEND_API_URL}/api/users/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/users/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +78,7 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${process.env.BACKEND_API_URL}/api/users/verify-code`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/users/verify-code`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
