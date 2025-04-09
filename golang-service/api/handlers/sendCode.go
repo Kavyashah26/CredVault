@@ -190,13 +190,23 @@ func SendCodeHandler(c *gin.Context) {
 	}
 
 	// Send email asynchronously
-	go func(email, code string) {
-		if err := utils.SendEmail(email, code); err != nil {
-			log.Printf("Failed to send email: %v", err)
-		}
-	}(request.Email, code)
+	// go func(email, code string) {
+	// 	if err := utils.SendEmail(email, code); err != nil {
+	// 		log.Printf("Failed to send email: %v", err)
+	// 	}
+	// }(request.Email, code)
 
-	// ✅ Return success response immediately
+	if err := utils.SendEmail(request.Email, code); err != nil {
+		log.Printf("Failed to send email to %s: %v", request.Email, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to send email",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Return success response immediately
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Security code sent successfully",
