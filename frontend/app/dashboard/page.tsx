@@ -228,6 +228,8 @@ export default function DashboardPage() {
         console.log(data)
 
         setOrganizations(data.organizations)
+        console.log("My organizations", data.organizations);
+        
         setProjects(data.projects)
         setUserName(data.name)
       } catch (error) {
@@ -264,7 +266,7 @@ export default function DashboardPage() {
           />
           <StatCard
             title="Team Members"
-            value={organizations.reduce((sum, org) => sum + org.memberCount, 0)}
+            value={(organizations.reduce((sum, org) => sum + org.memberCount, 0)) - organizations.length}
             icon={<Users className="h-4 w-4 text-muted-foreground" />}
           />
           <StatCard

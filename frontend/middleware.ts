@@ -23,15 +23,27 @@ export function middleware(request: NextRequest) {
   }
 
   // Special handling for organization routes
+  const requestHeaders = new Headers(request.headers)
   if (pathname.startsWith("/dashboard/organization/")) {
-    const role = request.cookies.get("org_role")?.value
+    const orgRole = request.cookies.get("org_role")?.value
 
-    if (!role) {
+    if (!orgRole) {
       return NextResponse.redirect(new URL("/dashboard", request.url))
     }
 
-    const requestHeaders = new Headers(request.headers)
-    requestHeaders.set("x-org-role", role)
+    requestHeaders.set("x-org-role", orgRole)
+
+    const match = pathname.match(/^\/dashboard\/organization\/([^\/]+)\/project\/([^\/]+)/)
+    if (match) {
+      const projectId = match[2]
+      const projectRole = request.cookies.get(`project_role_${projectId}`)?.value
+
+      if (!projectRole) {
+        return NextResponse.redirect(new URL("/dashboard", request.url))
+      }
+
+      requestHeaders.set("x-project-role", projectRole)
+    }
 
     const response = NextResponse.next({
       request: {

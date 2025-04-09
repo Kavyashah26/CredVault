@@ -66,14 +66,48 @@ export default function ProjectPage() {
 
   // Check if user is admin
   useEffect(() => {
-    const checkAdminStatus = () => {
-      // add logic to check admin
-      const orgRole = "ADMIN"
-      setIsAdmin(orgRole === "ADMIN")
+    // const checkAdminStatus = () => {
+    //   // add logic to check admin
+    //   const orgRole = document.cookie
+    //     .split("; ")
+    //     .find((row) => row.startsWith("org_role="))
+    //     ?.split("=")[1]
+
+    //   // Check for project-specific role in cookies
+    //   const projectRoleCookie = document.cookie
+    //     .split("; ")
+    //     .find((row) => row.startsWith(`project_role_${projectId}=`))
+    //     ?.split("=")[1]
+
+    //   // Set admin status based on roles
+    //   const isOrgAdmin = orgRole === "ADMIN"
+    //   const isProjectAdmin = projectRoleCookie === "PROJECT_MANAGER"
+
+    //   // User is admin if they have admin role at org or project level
+    //   console.log("Is allowd org", isOrgAdmin )
+    //   console.log("Is allowd proj",document.cookie
+    //     .split("; "));
+      
+    //   setIsAdmin(isOrgAdmin || isProjectAdmin)
+    // }
+    const fetchAdminStatus = async () => {
+      try {
+        // Import the server action
+        const { checkAdminStatus } = await import("@/app/actions/checkAdminStatus")
+
+        // Call the server action to check admin status
+        const isAdminResult = await checkAdminStatus(projectId)
+        setIsAdmin(isAdminResult)
+      } catch (error) {
+        console.error("Error checking admin status:", error)
+        setIsAdmin(false)
+      }
     }
 
-    checkAdminStatus()
-  }, [])
+    if (projectId) {
+      fetchAdminStatus()
+    }
+  }, [projectId])
 
   useEffect(() => {
     if (!projectId) return

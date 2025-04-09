@@ -11,6 +11,7 @@ import Link from "next/link"
 import { MembersList } from "@/app/components/members-list"
 import { InviteMembers } from "@/app/components/invite-members"
 import { OrganizationSettings } from "@/app/components/organization-settings"
+import { redirectToProject } from "@/app/actions/redirectToProject"
 
 
 interface Project {
@@ -105,10 +106,10 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
   useEffect(() => {
     fetchOrganizationDetails()
     fetchProjects()
-    console.log(organization);
     
   }, [fetchOrganizationDetails, fetchProjects]) // Dependencies are now stable
   
+  console.log("projects" , projects);
 
   if (!organization) {
     return <div>Loading...</div>
@@ -129,7 +130,7 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
                 <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{organization.projectCount}</div>
+                <div className="text-2xl font-bold">{projects.length}</div>
               </CardContent>
             </Card>
 
@@ -138,7 +139,7 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
                 <CardTitle className="text-sm font-medium">Total Members</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{organization.memberCount}</div>
+                <div className="text-2xl font-bold">{projects.reduce((sum, project) => sum + project.memberCount, 0)}</div>
               </CardContent>
             </Card>
           </>
@@ -200,17 +201,17 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
                           <Users className="h-5 w-5 mr-2 text-gray-500" />
                           <span>{project.memberCount} Members</span>
                         </div>
-                        <div className="flex items-center">
+                        {/* <div className="flex items-center">
                           <Calendar className="h-5 w-5 mr-2 text-gray-500" />
                           <span>Active {project.lastActive}</span>
-                        </div>
+                        </div> */}
                       </div>
-                      <Link href={`/dashboard/organization/${orgId}/project/${project.id}`}>
-                        <Button className="w-full">
+                      {/* <Link href={`/dashboard/organization/${orgId}/project/${project.id}`}> */}
+                        <Button className="w-full" onClick={() => redirectToProject(orgId, project.id, project.role)}>
                           View Credentials
                           <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
-                      </Link>
+                      {/* </Link> */}
                     </CardContent>
                   </Card>
                 </motion.div>
