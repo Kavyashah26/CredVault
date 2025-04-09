@@ -109,5 +109,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 // 	r.POST("/api/invites/send", handlers.SendInviteHandler)
 // 	r.POST("/api/invites/accept", handlers.AcceptInviteHandler)
 	
+// 	r.POST("/api/send-code", handlers.SendCodeHandler)
+// 	r.POST("/api/verify-code", handlers.VerifyCodeHandler)
+// 	r.GET("/api/health", handlers.HealthCheck)
 // 	r.Run(":8080") // Start server
 // }

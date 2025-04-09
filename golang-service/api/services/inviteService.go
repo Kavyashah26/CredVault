@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"golang-service/api/utils"
@@ -13,67 +14,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SendInvites sends invites to multiple users
-// func SendInvites(orgID string, emails []string,message string) error {
-// 	for _, email := range emails {
-// 		token := utils.GenerateToken() // Generate a unique token
-// 		err := models.StoreInvite(orgID, email, token)
-// 		if err != nil {
-// 			log.Printf("Failed to send invite to %s: %v", email, err)
-// 			continue
-// 		}
-// 		utils.SendInviteEmail(email, token,message)
-// 	}
-// 	return nil
-// }
-
-// func SendInvites(orgID string, emails []string, message string) error {
-// 	redisClient := utils.GetRedis()
-// 	ctx := context.Background()
-
-// 	for _, email := range emails {
-// 		token := utils.GenerateToken() // Generate token
-
-// 		// Store in Redis (expires in 1 hour)
-// 		err := redisClient.Set(ctx, fmt.Sprintf("invite:%s", token), orgID, time.Hour).Err()
-// 		if err != nil {
-// 			log.Printf("Failed to store invite token in Redis: %v", err)
-// 			continue
-// 		}
-
-// 		utils.SendInviteEmail(email, token, message)
-// 	}
-// 	return nil
-// }
-
-// AcceptInvite marks an invite as accepted
-// func AcceptInvite(token string) error {
-// 	return models.AcceptInvite(token)
-// }
-
-// func AcceptInviteHandler(c *gin.Context) {
-// 	var request struct {
-// 		Token string json:"token" binding:"required"
-// 	}
-
-// 	if err := c.ShouldBindJSON(&request); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(),"success": false})
-// 		return
-// 	}
-
-// 	err := services.AcceptInvite(request.Token)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid or expired invite","success": false,})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{"message": "Invite accepted successfully","success": true})
-// }
-
 func SendInvites(orgID string, emails []string, message string) error {
 	redisClient := utils.GetRedis()
 	ctx := context.Background()
 
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var sendErrs []string
+	
 	for _, email := range emails {
 		token := utils.GenerateToken() // Generate a unique token
 
@@ -84,18 +32,29 @@ func SendInvites(orgID string, emails []string, message string) error {
 			continue
 		}
 
+		wg.Add(1)
+
 		// Send email with invite token
 		// utils.SendInviteEmail(email, token, message)
 		go func(email, token string) {
+			defer wg.Done()
 			err:=utils.SendInviteEmail(email, token, message);
 			if err != nil {
 				log.Printf("Failed to send email to %s: %v", email, err)
+				mu.Lock()
+				sendErrs = append(sendErrs, fmt.Sprintf("Failed to send to %s", email))
+				mu.Unlock()
 			} else {
 				log.Printf("📩 Invite email sent successfully to %s", email)
 			}
 		}(email, token)
-	
 	}
+	wg.Wait()
+
+	if len(sendErrs) > 0 {
+		return fmt.Errorf("some emails failed to send: %v", sendErrs)
+	}
+
 	return nil
 }
 
