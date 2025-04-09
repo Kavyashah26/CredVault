@@ -30,23 +30,37 @@ func SendInviteHandler(c *gin.Context) {
 		return
 	}
 
-	// ✅ Immediate success response (ensures faster response time)
-	c.JSON(http.StatusAccepted, gin.H{
-		"success": true,
-		"message": "Invites are being processed.",
-	})
+	// // ✅ Immediate success response (ensures faster response time)
+	// c.JSON(http.StatusAccepted, gin.H{
+	// 	"success": true,
+	// 	"message": "Invites are being processed.",
+	// })
 
-	// ✅ Process the invites asynchronously
-	go func() {
-		// for _, email := range request.Emails {
-			err := services.SendInvites(request.OrgID, request.Emails, request.Message)
-			if err != nil {
-				log.Printf("Error sending invites: %v", err)
-			} else {
-				log.Printf("Invites sent successfully for OrgID: %s", request.OrgID)
-			}
-		// }
-	}()
+	// // ✅ Process the invites asynchronously
+	// go func() {
+	// 	// for _, email := range request.Emails {
+	// 		err := services.SendInvites(request.OrgID, request.Emails, request.Message)
+	// 		if err != nil {
+	// 			log.Printf("Error sending invites: %v", err)
+	// 		} else {
+	// 			log.Printf("Invites sent successfully for OrgID: %s", request.OrgID)
+	// 		}
+	// 	// }
+	// }()
+	err := services.SendInvites(request.OrgID, request.Emails, request.Message)
+	if err != nil {
+		log.Printf("Error sending invites: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to send some or all invites.",
+			"error":   err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Invites sent successfully.",
+	})
 }
 
 func AcceptInviteHandler(c *gin.Context) {
