@@ -69,14 +69,13 @@ export default function CustomerSuccessStories() {
             </div>
           </motion.div>
         </AnimatePresence>
-        <Button variant="ghost" className="absolute left-0 top-1/2 transform -translate-y-1/2" onClick={prevStory}>
+        <Button variant="ghost" className="absolute left-0 top-1/2 transform -translate-y-1/2 rounded-full" onClick={prevStory}>
           <ChevronLeft size={24} />
         </Button>
-        <Button variant="ghost" className="absolute right-0 top-1/2 transform -translate-y-1/2" onClick={nextStory}>
+        <Button variant="ghost" className="absolute right-0 top-1/2 transform -translate-y-1/2 rounded-full" onClick={nextStory}>
           <ChevronRight size={24} />
         </Button>
       </div>
     </div>
   )
 }
-

@@ -18,7 +18,7 @@ const actions = [
 ]
 
 export default function CollaborationSimulator() {
-  const [logs, setLogs] = useState<Array<{ user: typeof users[0], action: string }>>([])
+  const [logs, setLogs] = useState<Array<{ user: (typeof users)[0], action: string }>>([])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -52,4 +52,3 @@ export default function CollaborationSimulator() {
     </div>
   )
 }
-

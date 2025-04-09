@@ -46,9 +46,8 @@ export default function CredentialLifecycleVisualizer() {
           {currentStage === 3 && "Regularly update credentials to maintain security."}
           {currentStage === 4 && "Securely revoke and delete credentials when no longer needed."}
         </p>
-        <Button onClick={nextStage}>Next Stage</Button>
+        <Button onClick={nextStage} className='rounded-full px-6'>Next Stage</Button>
       </div>
     </div>
   )
 }
-

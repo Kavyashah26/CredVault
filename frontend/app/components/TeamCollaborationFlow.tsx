@@ -48,7 +48,7 @@ export default function TeamCollaborationFlow() {
             key={role.name}
             onClick={() => setCurrentRole(role)}
             variant={currentRole.name === role.name ? 'default' : 'outline'}
-            className="flex items-center"
+            className="flex items-center rounded-full"
           >
             <role.icon className="mr-2" width={16} height={16} />
             {role.name}
@@ -59,7 +59,7 @@ export default function TeamCollaborationFlow() {
         {actions.map((action) => (
           <motion.div
             key={action.name}
-            className={`p-4 rounded-lg ${
+            className={`p-4 rounded-xl ${
               action.allowedRoles.includes(currentRole.name)
                 ? currentRole.color
                 : 'bg-gray-200'
