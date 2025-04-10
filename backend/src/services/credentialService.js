@@ -164,14 +164,23 @@ const getCredentialsByProject = async (projectId) => {
 };
 
 const updateCredential = async (id, updateData, userId) => {
-  const encryptedValue = updateData.value ? encrypt(updateData.value, CREDENTIAL_SECRET) : undefined;
+  // const encryptedValue = updateData.value ? encrypt(updateData.value, CREDENTIAL_SECRET) : undefined;
+
+  const allowedFields = ['name', 'type', 'value', 'description'];
+  const filteredData = {};
+
+  for (const key of allowedFields) {
+    if (updateData[key] !== undefined) {
+      filteredData[key] = updateData[key];
+    }
+  }
+  if (filteredData.value) {
+    filteredData.value = await encrypt(filteredData.value, CREDENTIAL_SECRET);
+  }
 
   const updatedCredential = await prisma.credential.update({
     where: { id },
-    data: {
-      ...updateData,
-      value: encryptedValue,
-    },
+    data:filteredData
   });
 
   // Log activity

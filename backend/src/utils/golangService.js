@@ -1,5 +1,6 @@
 
-import axios from 'axios';
+// import axios from 'axios';
+const axios = require('axios')
 
 const generateInvite = async (orgId, emails,message) => {
     console.log(orgId);
