@@ -196,3 +196,23 @@ exports.acceptInvite = async (req, res) => {
     return res.status(500).json({ message: "Failed to accept invite", error: error.message });
   }
 };
+
+
+exports.updateOrganization = async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    const updatedData = req.body;
+
+    const updatedOrg = await organizationService.updateOrganization(organizationId, updatedData, req.user.userId);
+
+    res.status(200).json({
+      message: 'Organization updated successfully.',
+      organization: updatedOrg,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Failed to update organization.',
+    });
+  }
+};

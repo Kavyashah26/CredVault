@@ -490,7 +490,26 @@ const verifyInviteToken = async (token) => {
 };
 
 
+const updateOrganization = async (orgId, updatedData, userId) => {
 
+  try{
+     const updatedOrganization = await prisma.organization.update({
+      where: { id: orgId },
+      data: {
+        name: updatedData.name,
+        description: updatedData.description,
+      },
+      include: {
+        members: true,
+      },
+    });
+
+    return updatedOrganization;
+  }catch(error){
+    console.error('Error updating organization:', error.message);
+    throw new Error(error.message || 'An unexpected error occurred while updating the organization.');
+  }
+};
 
 module.exports = {
   createOrganization,
@@ -501,5 +520,6 @@ module.exports = {
   getOrganizationStats,
   getOrgUserProjects,
   inviteToOrganization,
-  verifyInviteToken
+  verifyInviteToken,
+  updateOrganization
 };

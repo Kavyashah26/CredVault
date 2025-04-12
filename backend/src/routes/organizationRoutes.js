@@ -28,17 +28,8 @@ router.delete('/:organizationId/members/:userId', authMiddleware,roleMiddleware(
 
 router.get('/:organizationId/stats',authMiddleware,roleMiddleware('ADMIN'), organizationController.getOrganizationStats);
 
-router.get('/:orgId/user', authMiddleware, organizationController.getOrgUserProjects);
+router.get('/:organizationId/user', authMiddleware, organizationController.getOrgUserProjects);
 
-
-
-//  ------------------------------
-
-//done
-
-
-
-
-
+router.put('/:organizationId', authMiddleware,roleMiddleware('ADMIN'), organizationController.updateOrganization);
 
 module.exports = router;
