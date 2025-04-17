@@ -5,9 +5,8 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { AlertCircle, X } from 'lucide-react'
+import { AlertCircle, X, Key, Lock, CoinsIcon as Token, FileKey, FileText } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
@@ -18,6 +17,13 @@ interface AddCredentialModalProps {
   projectId: string | undefined
   onCredentialAdded?: () => void
   existingCredentials?: { name: string }[]
+}
+
+type CredentialType = {
+  id: string
+  name: string
+  icon: React.ElementType
+  description: string
 }
 
 export default function AddCredentialModal({
@@ -37,6 +43,40 @@ export default function AddCredentialModal({
   const [error, setError] = useState<string | null>(null)
   const [nameError, setNameError] = useState<string | null>(null)
   const [valueError, setValueError] = useState<string | null>(null)
+  const [typeError, setTypeError] = useState<string | null>(null)
+
+  const credentialTypes: CredentialType[] = [
+    {
+      id: "api_key",
+      name: "API Key",
+      icon: Key,
+      description: "Used to authenticate API requests",
+    },
+    {
+      id: "password",
+      name: "Password",
+      icon: Lock,
+      description: "Secure access to accounts and services",
+    },
+    {
+      id: "token",
+      name: "Access Token",
+      icon: Token,
+      description: "Temporary credentials for authentication",
+    },
+    {
+      id: "secret",
+      name: "Secret Key",
+      icon: FileKey,
+      description: "Private keys used for encryption/signing",
+    },
+    {
+      id: "certificate",
+      name: "Certificate",
+      icon: FileText,
+      description: "Digital certificates for secure connections",
+    },
+  ]
 
   const resetForm = () => {
     setCredentialName("")
@@ -48,6 +88,7 @@ export default function AddCredentialModal({
     setError(null)
     setNameError(null)
     setValueError(null)
+    setTypeError(null)
   }
 
   const validateForm = (): boolean => {
@@ -56,6 +97,7 @@ export default function AddCredentialModal({
     // Reset errors
     setNameError(null)
     setValueError(null)
+    setTypeError(null)
 
     // Check for unique name
     if (existingCredentials?.some((cred) => cred.name.toLowerCase() === credentialName.toLowerCase())) {
@@ -66,6 +108,12 @@ export default function AddCredentialModal({
     // Check for empty value
     if (!credentialValue.trim()) {
       setValueError("Credential value cannot be empty")
+      isValid = false
+    }
+
+    // Check for credential type
+    if (!credentialType) {
+      setTypeError("Please select a credential type")
       isValid = false
     }
 
@@ -156,13 +204,13 @@ export default function AddCredentialModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md rounded-xl">
         <DialogHeader>
           <DialogTitle>Add New Credential</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           {error && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert variant="destructive" className="mb-4 rounded-xl">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -181,30 +229,50 @@ export default function AddCredentialModal({
                     setCredentialName(e.target.value)
                     if (nameError) setNameError(null)
                   }}
-                  className={nameError ? "border-red-500" : ""}
+                  className={`rounded-full ${nameError ? "border-red-500" : ""}`}
                   required
                   disabled={isLoading}
                 />
                 {nameError && <p className="text-sm text-red-500">{nameError}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="credentialType" className="text-right">
-                Type
+
+            <div className="grid grid-cols-4 items-start gap-4">
+              <label className="text-right pt-2">
+                Type <span className="text-red-500">*</span>
               </label>
-              <Select onValueChange={setCredentialType} value={credentialType} disabled={isLoading} required>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select credential type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="api_key">API Key</SelectItem>
-                  <SelectItem value="password">Password</SelectItem>
-                  <SelectItem value="token">Access Token</SelectItem>
-                  <SelectItem value="secret">Secret Key</SelectItem>
-                  <SelectItem value="certificate">Certificate</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="col-span-3 space-y-1">
+                <div className="grid grid-cols-2 gap-2">
+                  {credentialTypes.map((type) => (
+                    <div
+                      key={type.id}
+                      className={`
+            flex items-center p-2 rounded-xl cursor-pointer border transition-all
+            ${credentialType === type.id ? "border-black bg-black/5" : "border-gray-200 hover:border-gray-300"}
+          `}
+                      onClick={() => {
+                        setCredentialType(type.id)
+                        if (typeError) setTypeError(null)
+                      }}
+                    >
+                      <div
+                        className={`
+            p-1.5 rounded-full mr-2
+            ${credentialType === type.id ? "bg-black text-white" : "bg-gray-100 text-gray-500"}
+          `}
+                      >
+                        <type.icon className="h-4 w-4" />
+                      </div>
+                      <div className="text-sm">
+                        <h4 className="font-medium">{type.name}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {typeError && <p className="text-sm text-red-500">{typeError}</p>}
+              </div>
             </div>
+
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="credentialValue" className="text-right">
                 Value
@@ -217,7 +285,7 @@ export default function AddCredentialModal({
                     setCredentialValue(e.target.value)
                     if (valueError) setValueError(null)
                   }}
-                  className={valueError ? "border-red-500" : ""}
+                  className={`rounded-full ${valueError ? "border-red-500" : ""}`}
                   type="password"
                   required
                   disabled={isLoading}
@@ -233,7 +301,7 @@ export default function AddCredentialModal({
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="col-span-3"
+                className="col-span-3 rounded-xl"
                 placeholder="Optional description for this credential"
                 disabled={isLoading}
                 rows={3}
@@ -252,16 +320,21 @@ export default function AddCredentialModal({
                     placeholder="Add tags (press Enter)"
                     disabled={isLoading}
                     onKeyDown={handleTagKeyDown}
-                    className="flex-grow"
+                    className="flex-grow rounded-full"
                   />
-                  <Button type="button" onClick={addTag} disabled={isLoading || !tagInput.trim()} className="ml-2">
+                  <Button
+                    type="button"
+                    onClick={addTag}
+                    disabled={isLoading || !tagInput.trim()}
+                    className="ml-2 rounded-full"
+                  >
                     Add
                   </Button>
                 </div>
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      <Badge key={index} variant="secondary" className="flex items-center gap-1 rounded-full">
                         {tag}
                         <button
                           type="button"
@@ -280,10 +353,10 @@ export default function AddCredentialModal({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading} className="rounded-full">
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="rounded-full bg-black text-white hover:bg-gray-800">
               {isLoading ? (
                 <>
                   <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></span>

@@ -109,11 +109,11 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
     
   }, [fetchOrganizationDetails, fetchProjects]) // Dependencies are now stable
   
-  console.log("projects" , projects);
-
+  
   if (!organization) {
     return <div>Loading...</div>
   }
+  // console.log("projects" , organization);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -149,8 +149,8 @@ export default function OrganizationPageClient({ orgId, role }: OrganizationPage
               <CardTitle className="text-sm font-medium">Admin Information</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Total Projects: {organization.projectCount || "N/A"}</div>
-              <div className="text-2xl font-bold">Total Members: {organization.memberCount || "N/A"}</div>
+              <div className="text-2xl font-bold">Total Projects: {projects.length}</div>
+              <div className="text-2xl font-bold">Total Members: {organization.members.length || "N/A"}</div>
               <div className="text-lg mt-2">Admin: {organization.creator.name}</div>
             </CardContent>
           </Card>

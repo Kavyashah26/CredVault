@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "@/hooks/use-toast"
+import { redirectToOrganization } from "@/app/actions/redirectToOrganization"
 
 
 export default function CreateOrganizationPage() {
@@ -51,8 +52,8 @@ export default function CreateOrganizationPage() {
         description: "Your new organization has been created successfully.",
       })
       console.log(data);
-      
-      router.push(`/dashboard/organization/${data.organization.id}`)
+      await redirectToOrganization(data.organization.id, "ADMIN")
+      // router.push(`/dashboard/organization/${data.organization.id}`)
     } catch (error) {
       console.error("Error creating organization:", error)
       toast({

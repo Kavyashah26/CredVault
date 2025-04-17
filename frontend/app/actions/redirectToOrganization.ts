@@ -13,7 +13,8 @@ export async function redirectToOrganization(organizationId: string, role: strin
     sameSite: "strict",
     maxAge: 3600, // 1 hour
   })
-
+  console.log(" I have added cookie with role", role);
+  
   // Redirect to the organization page
   redirect(`/dashboard/organization/${organizationId}`)
 }

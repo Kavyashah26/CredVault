@@ -191,8 +191,8 @@ export function MembersList({
                   </Button>
                 )}
 
-                {/* Don't show remove button for admins in project context */}
-                {((member.role !== "ADMIN" && isProjectContext) || !isProjectContext) && isAdmin && (
+                {/* Don't show remove button for admins in project and organization's context */}
+                {((member.role !== "ADMIN" )) && isAdmin && (
                   <Button variant="outline" size="sm" onClick={() => setMemberToRemove(member)}>
                     <UserMinus className="h-4 w-4 mr-2" />
                     Remove
