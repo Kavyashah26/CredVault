@@ -196,7 +196,8 @@ func SendCodeHandler(c *gin.Context) {
 	// 	}
 	// }(request.Email, code)
 
-	if err := utils.SendEmail(request.Email, code); err != nil {
+	// if err := utils.SendEmail(request.Email, code); err != nil {
+	if err := utils.SendEmailResend(request.Email, code); err != nil {
 		log.Printf("Failed to send email to %s: %v", request.Email, err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,

@@ -1,6 +1,6 @@
 module golang-service
 
-go 1.22
+go 1.23
 
 toolchain go1.23.6
 
@@ -15,6 +15,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gin-contrib/cors v1.7.3 // indirect
 	github.com/redis/go-redis/v9 v9.7.3 // indirect
+	github.com/resend/resend-go/v2 v2.17.0 // indirect
 )
 
 require (
