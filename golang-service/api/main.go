@@ -18,7 +18,7 @@ func InitializeRouter() *gin.Engine {
 
 	// Custom CORS configuration
 	config := cors.Config{
-		AllowOrigins:     []string{"https://cred-vault.vercel.app/", "http://localhost:3000" , "hhtps://api.credvaut.xyz"},
+		AllowOrigins:     []string{"https://cred-vault.vercel.app/", "http://localhost:3000" , "https://api.credvaut.xyz"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
